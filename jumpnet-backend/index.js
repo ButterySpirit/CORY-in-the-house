@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const { sequelize, User } = require('./models'); // Import Sequelize instance and User model
+const bcryptjs = require('bcryptjs'); // Import bcryptjs for password hashing/comparison
 
 const app = express();
 app.use(express.json());
@@ -14,6 +15,8 @@ app.get('/', (req, res) => {
 app.post('/users', async (req, res) => {
   try {
     const { username, email, password } = req.body;
+
+    // Create the user and hash the password (handled in the User model's hook)
     const user = await User.create({ username, email, password });
     res.status(201).json(user);
   } catch (err) {
@@ -54,6 +57,29 @@ app.delete('/users/:id', async (req, res) => {
     } else {
       res.status(404).json({ error: 'User not found' });
     }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// User login
+app.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Find user by email
+    const user = await User.scope('withPassword').findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ error: 'Invalid email or password' });
+    }
+
+    // Compare the provided password with the hashed password in the database
+    const isPasswordValid = await bcryptjs.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    res.json({ message: 'Login successful' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
