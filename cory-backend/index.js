@@ -8,7 +8,7 @@ app.use(express.json());
 
 // Test route
 app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to JumpNet Backend!' });
+  res.json({ message: 'Welcome to CORY Backend!' });
 });
 
 // Create a new user
@@ -94,29 +94,7 @@ app.post('/users/:id/click', async (req, res) => {
       if (!userId) {
           return res.status(400).json({ error: 'User ID is required in the body.' });
       }
-
-      // Fetch both users
-      const clickingUser = await User.findByPk(userId);
-      const targetUser = await User.findByPk(id);
-
-      if (!clickingUser || !targetUser) {
-          return res.status(404).json({ error: 'User not found.' });
-      }
-
-      // Check if the link has already been clicked by this user
-      if (clickingUser.usedLinks.includes(id)) {
-          return res.status(400).json({ error: 'This link has already been used by the user.' });
-      }
-
-      // Increment target user's jumpHeight
-      targetUser.jumpHeight += 1;
-      await targetUser.save();
-
-      // Update the clicking user's usedLinks
-      clickingUser.usedLinks.push(id);
-      await clickingUser.save();
-
-      res.json({ message: 'Jump height incremented successfully.', targetUser });
+      
   } catch (err) {
       res.status(500).json({ error: err.message });
   }

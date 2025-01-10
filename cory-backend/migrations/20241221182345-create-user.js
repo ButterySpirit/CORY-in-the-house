@@ -15,9 +15,6 @@ module.exports = {
       email: {
         type: Sequelize.STRING
       },
-      jumpHeight: {
-        type: Sequelize.FLOAT
-      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

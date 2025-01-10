@@ -24,10 +24,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      jumpHeight: {
-        type: DataTypes.FLOAT,
-        defaultValue: 1.0,
-      },
       usedLinks: {
         type: DataTypes.ARRAY(DataTypes.UUID),
         defaultValue: [], // Array to store IDs of links the user has clicked
