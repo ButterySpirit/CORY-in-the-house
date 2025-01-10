@@ -28,26 +28,33 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.FLOAT,
         defaultValue: 1.0,
       },
+      usedLinks: {
+        type: DataTypes.ARRAY(DataTypes.UUID),
+        defaultValue: [], // Array to store IDs of links the user has clicked
+        allowNull: false,
+      },
     },
     {
       hooks: {
+        // Automatically hash the password before creating a user
         beforeCreate: async (user) => {
           if (user.password) {
-            user.password = await bcryptjs.hash(user.password, 10); // Hash password before saving
+            user.password = await bcryptjs.hash(user.password, 10);
           }
         },
+        // Automatically hash the password before updating a user
         beforeUpdate: async (user) => {
           if (user.password) {
-            user.password = await bcryptjs.hash(user.password, 10); // Hash password before updating
+            user.password = await bcryptjs.hash(user.password, 10);
           }
         },
       },
       defaultScope: {
-        attributes: { exclude: ['password'] }, // Exclude password in responses by default
+        attributes: { exclude: ['password'] }, // Hide the password by default
       },
       scopes: {
         withPassword: {
-          attributes: { include: ['password'] },
+          attributes: { include: ['password'] }, // Include password when explicitly needed
         },
       },
     }
