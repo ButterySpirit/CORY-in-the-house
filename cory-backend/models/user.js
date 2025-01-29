@@ -24,6 +24,16 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      role: {
+        type: DataTypes.ENUM('organizer', 'volunteer', 'staff'),
+        allowNull: false,
+        defaultValue: 'staff', // Default role is volunteer
+      },
+      rating: {
+        type: DataTypes.FLOAT,
+        defaultValue: 0.0, // Default rating
+        validate: { min: 0, max: 5 }, // Ensure rating is between 0 and 5
+      },
       usedLinks: {
         type: DataTypes.ARRAY(DataTypes.UUID),
         defaultValue: [], // Array to store IDs of links the user has clicked

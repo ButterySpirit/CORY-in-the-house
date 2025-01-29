@@ -3,6 +3,7 @@ const express = require('express');
 const { sequelize, User } = require('./models'); // Import Sequelize instance and User model
 const bcryptjs = require('bcryptjs'); // Import bcryptjs for password hashing/comparison
 
+
 const app = express();
 app.use(express.json());
 
@@ -85,20 +86,52 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.post('/users/:id/click', async (req, res) => {
-  console.log(`POST /users/${req.params.id}/click`, req.body);
+// Update user role (Admin or Organizer only)
+app.put('/users/:id/role', async (req, res) => {
   try {
-      const { id } = req.params; // Target user ID
-      const { userId } = req.body; // Clicking user ID
+    const { id } = req.params;
+    const { role } = req.body;
 
-      if (!userId) {
-          return res.status(400).json({ error: 'User ID is required in the body.' });
-      }
-      
+    if (!['organizer', 'volunteer', 'staff'].includes(role)) {
+      return res.status(400).json({ error: 'Invalid role' });
+    }
+
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    user.role = role;
+    await user.save();
+    res.json(user);
   } catch (err) {
-      res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
+
+// Update user rating (Organizers only)
+app.put('/users/:id/rating', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating } = req.body;
+
+    if (rating < 0 || rating > 5) {
+      return res.status(400).json({ error: 'Invalid rating value. Must be between 0 and 5.' });
+    }
+
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    user.rating = rating;
+    await user.save();
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 
 // Start server
