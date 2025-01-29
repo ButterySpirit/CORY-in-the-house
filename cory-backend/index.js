@@ -1,143 +1,46 @@
-require('dotenv').config();
-const express = require('express');
-const { sequelize, User } = require('./models'); // Import Sequelize instance and User model
-const bcryptjs = require('bcryptjs'); // Import bcryptjs for password hashing/comparison
-
+require("dotenv").config();
+const express = require("express");
+const session = require("express-session");
+const { sequelize } = require("./models"); // Import Sequelize instance
+const userRoutes = require("./routes/users"); // User routes
+const eventRoutes = require("./routes/events"); // Event routes
+const jobPostingRoutes = require("./routes/jobPostings"); // Job Posting routes
 
 const app = express();
-app.use(express.json());
+
+// 🔹 Use Sessions to Track Logged-In Users
+app.use(
+  session({
+    secret: "your-secret-key", // Change this to a secure key
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false }, // Set to `true` if using HTTPS
+  })
+);
+
+// Middleware
+app.use(express.json()); // Parse JSON requests
 
 // Test route
-app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to CORY Backend!' });
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome to CORY Backend!" });
 });
 
-// Create a new user
-app.post('/users', async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
-
-    // Create the user and hash the password (handled in the User model's hook)
-    const user = await User.create({ username, email, password });
-    res.status(201).json(user);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
+// 🔹 Middleware to Log Session Data
+app.use((req, res, next) => {
+  console.log("🛠️ Session Data:", req.session);
+  next();
 });
 
-// Get all users
-app.get('/users', async (req, res) => {
-  try {
-    const users = await User.findAll();
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Get a specific user by ID
-app.get('/users/:id', async (req, res) => {
-  try {
-    const user = await User.findByPk(req.params.id);
-    if (user) {
-      res.json(user);
-    } else {
-      res.status(404).json({ error: 'User not found' });
-    }
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Delete a user by ID
-app.delete('/users/:id', async (req, res) => {
-  try {
-    const result = await User.destroy({ where: { id: req.params.id } });
-    if (result) {
-      res.json({ message: 'User deleted successfully' });
-    } else {
-      res.status(404).json({ error: 'User not found' });
-    }
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// User login
-app.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    // Find user by email
-    const user = await User.scope('withPassword').findOne({ where: { email } });
-    if (!user) {
-      return res.status(404).json({ error: 'Invalid email or password' });
-    }
-
-    // Compare the provided password with the hashed password in the database
-    const isPasswordValid = await bcryptjs.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-
-    res.json({ message: 'Login successful' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Update user role (Admin or Organizer only)
-app.put('/users/:id/role', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { role } = req.body;
-
-    if (!['organizer', 'volunteer', 'staff'].includes(role)) {
-      return res.status(400).json({ error: 'Invalid role' });
-    }
-
-    const user = await User.findByPk(id);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    user.role = role;
-    await user.save();
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Update user rating (Organizers only)
-app.put('/users/:id/rating', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { rating } = req.body;
-
-    if (rating < 0 || rating > 5) {
-      return res.status(400).json({ error: 'Invalid rating value. Must be between 0 and 5.' });
-    }
-
-    const user = await User.findByPk(id);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    user.rating = rating;
-    await user.save();
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
+// 🔹 Integrate API Routes
+app.use("/users", userRoutes); // Handles user-related actions
+app.use("/events", eventRoutes); // Handles event creation
+app.use("/events", jobPostingRoutes); // ✅ Job postings are under events
 
 // Start server
 const PORT = process.env.PORT || 3000;
 sequelize.sync().then(() => {
   app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`🚀 Server is running on http://localhost:${PORT}`);
   });
 });

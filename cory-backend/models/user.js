@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
       role: {
         type: DataTypes.ENUM('organizer', 'volunteer', 'staff'),
         allowNull: false,
-        defaultValue: 'staff', // Default role is volunteer
+        defaultValue: 'organizer', // Default role is volunteer
       },
       rating: {
         type: DataTypes.FLOAT,
