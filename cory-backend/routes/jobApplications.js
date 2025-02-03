@@ -1,20 +1,45 @@
 const express = require("express");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 const { JobApplication, User, JobPosting } = require("../models");
 const { isUser, isOrganizer } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-// 🔹 Apply for a Job Posting (Only Volunteers & Staff)
-router.post("/:jobPostingId/apply", isUser, async (req, res) => {
+// 🔹 Ensure `uploads/resumes` directory exists
+const resumeUploadPath = path.join(__dirname, "../uploads/resumes");
+if (!fs.existsSync(resumeUploadPath)) {
+  fs.mkdirSync(resumeUploadPath, { recursive: true });
+}
+
+// 🔹 Configure Multer for Resume Uploads
+const storage = multer.diskStorage({
+  destination: resumeUploadPath,
+  filename: (req, file, cb) => {
+    cb(null, `${req.session.userId}-${Date.now()}${path.extname(file.originalname)}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // ✅ Limit file size to 5MB
+  fileFilter: (req, file, cb) => {
+    const allowedExtensions = [".pdf", ".doc", ".docx"];
+    if (!allowedExtensions.includes(path.extname(file.originalname).toLowerCase())) {
+      return cb(new Error("Only .pdf, .doc, and .docx files are allowed!"));
+    }
+    cb(null, true);
+  },
+});
+
+// 🔹 Apply for a Job Posting (Resume Required for Staff Jobs)
+router.post("/:jobPostingId/apply", isUser, upload.single("resume"), async (req, res) => {
   try {
     const { jobPostingId } = req.params;
-    const userId = req.session.userId; // Get logged-in user ID
+    const userId = req.session.userId;
 
-    if (!userId) {
-      return res.status(401).json({ error: "User must be logged in to apply" });
-    }
-
-    // ✅ Check if the Job Posting Exists
+    // ✅ Check if the job exists
     const jobPosting = await JobPosting.findByPk(jobPostingId);
     if (!jobPosting) {
       return res.status(404).json({ error: "Job posting not found" });
@@ -26,11 +51,21 @@ router.post("/:jobPostingId/apply", isUser, async (req, res) => {
       return res.status(400).json({ error: "You have already applied for this job." });
     }
 
+    // ✅ Require Resume for Staff Jobs
+    let resumePath = null;
+    if (jobPosting.role === "staff") {
+      if (!req.file) {
+        return res.status(400).json({ error: "A resume is required for staff applications." });
+      }
+      resumePath = `/uploads/resumes/${req.file.filename}`;
+    }
+
     // ✅ Create Job Application
     const jobApplication = await JobApplication.create({
       userId,
       jobPostingId,
       status: "pending",
+      resume: resumePath, // ✅ Store resume path in database
     });
 
     res.status(201).json({ message: "Application submitted successfully!", jobApplication });

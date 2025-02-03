@@ -9,20 +9,39 @@ module.exports = {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4, // ✅ Generates a new UUID automatically
       },
-      
       username: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true,
       },
       email: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      
+      role: {
+        type: Sequelize.ENUM("organizer", "volunteer", "staff"), // ✅ Add role column
+        allowNull: false,
+        defaultValue: "staff",
+      },
+      rating: {
+        type: Sequelize.FLOAT,
+        defaultValue: 0.0,
+        validate: { min: 0, max: 5 },
+      },
+      usedLinks: {
+        type: Sequelize.ARRAY(Sequelize.UUID),
+        allowNull: false,
+        defaultValue: [],
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       }
     });
   },

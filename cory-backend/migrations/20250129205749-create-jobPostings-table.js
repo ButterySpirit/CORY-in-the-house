@@ -17,6 +17,10 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: false
       },
+      role: {
+        type: Sequelize.ENUM("volunteer", "staff"), // ✅ Ensures the role column exists
+        allowNull: false
+      },
       salary: {
         type: Sequelize.DECIMAL,
         allowNull: true
@@ -29,9 +33,20 @@ module.exports = {
           key: "id"
         },
         onDelete: "CASCADE"
+      },
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP")
+      },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP")
       }
     });
   },
+  
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable("JobPostings");
   }

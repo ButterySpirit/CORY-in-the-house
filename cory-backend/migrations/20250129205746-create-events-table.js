@@ -33,9 +33,20 @@ module.exports = {
           key: "id"
         },
         onDelete: "CASCADE"
+      },
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP") // ✅ Adds createdAt field
+      },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP") // ✅ Adds updatedAt field
       }
     });
   },
+
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable("Events");
   }

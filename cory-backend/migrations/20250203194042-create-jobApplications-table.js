@@ -1,4 +1,5 @@
 'use strict';
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -26,6 +27,10 @@ module.exports = {
           key: 'id'
         },
         onDelete: 'CASCADE'
+      },
+      resume: { // ✅ Added resume field
+        type: Sequelize.STRING, // Storing as a file path (or you can use Sequelize.TEXT for base64)
+        allowNull: true // ✅ Only required for staff jobs (enforce this in backend logic)
       },
       status: {
         type: Sequelize.ENUM('pending', 'accepted', 'rejected'),

@@ -4,13 +4,26 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        primaryKey: true
+        primaryKey: true,
+      },
+      userId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        references: { model: "Users", key: "id" },
+      },
+      jobPostingId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        references: { model: "JobPostings", key: "id" },
       },
       status: {
         type: DataTypes.ENUM("pending", "accepted", "rejected"),
         defaultValue: "pending",
-        allowNull: false
-      }
+      },
+      resume: {
+        type: DataTypes.STRING, // ✅ Stores resume file path
+        allowNull: true, // ✅ Nullable for volunteers
+      },
     });
   
     JobApplication.associate = (models) => {
