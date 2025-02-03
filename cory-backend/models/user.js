@@ -1,8 +1,8 @@
-const bcryptjs = require('bcryptjs');
+const bcryptjs = require("bcryptjs");
 
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
-    'User',
+    "User",
     {
       id: {
         type: DataTypes.UUID,
@@ -19,48 +19,57 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
+        validate: {
+          isEmail: true, // ✅ Ensures valid email format
+        },
       },
       password: {
         type: DataTypes.STRING,
         allowNull: false,
       },
       role: {
-        type: DataTypes.ENUM('organizer', 'volunteer', 'staff'),
+        type: DataTypes.ENUM("organizer", "volunteer", "staff"),
         allowNull: false,
-        defaultValue: 'organizer', // Default role is volunteer
+        defaultValue: "staff", // ✅ Default role is "staff"
+        validate: {
+          isIn: [["organizer", "volunteer", "staff"]], // ✅ Ensures only valid roles
+        },
       },
       rating: {
         type: DataTypes.FLOAT,
-        defaultValue: 0.0, // Default rating
-        validate: { min: 0, max: 5 }, // Ensure rating is between 0 and 5
+        defaultValue: 0.0, // ✅ Default rating
+        validate: {
+          min: 0,
+          max: 5, // ✅ Ensure rating is between 0 and 5
+        },
       },
       usedLinks: {
         type: DataTypes.ARRAY(DataTypes.UUID),
-        defaultValue: [], // Array to store IDs of links the user has clicked
         allowNull: false,
+        defaultValue: [], // ✅ Array to store clicked links
       },
     },
     {
       hooks: {
-        // Automatically hash the password before creating a user
+        // ✅ Hash password before creating a user
         beforeCreate: async (user) => {
           if (user.password) {
             user.password = await bcryptjs.hash(user.password, 10);
           }
         },
-        // Automatically hash the password before updating a user
+        // ✅ Hash password only if it's changed during an update
         beforeUpdate: async (user) => {
-          if (user.password) {
+          if (user.changed("password")) {
             user.password = await bcryptjs.hash(user.password, 10);
           }
         },
       },
       defaultScope: {
-        attributes: { exclude: ['password'] }, // Hide the password by default
+        attributes: { exclude: ["password"] }, // ✅ Hide password in default queries
       },
       scopes: {
         withPassword: {
-          attributes: { include: ['password'] }, // Include password when explicitly needed
+          attributes: { include: ["password"] }, // ✅ Include password only when explicitly needed
         },
       },
     }

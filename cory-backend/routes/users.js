@@ -4,19 +4,23 @@ const { User } = require("../models"); // Import User model
 
 const router = express.Router();
 
-// 🔹 Create a new user
+// 🔹 Create a new user with role selection
 router.post("/", async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, role } = req.body;
 
-    // Create the user and hash the password (handled in hooks)
-    const user = await User.create({ username, email, password });
+    // ✅ Ensure role is valid if provided
+    const validRoles = ["organizer", "volunteer", "staff"];
+    const userRole = role && validRoles.includes(role.toLowerCase()) ? role.toLowerCase() : "volunteer";
+
+    // ✅ Create the user
+    const user = await User.create({ username, email, password, role: userRole });
 
     res.status(201).json({
       id: user.id,
       username: user.username,
       email: user.email,
-      role: user.role,
+      role: user.role, // ✅ Return selected role
       rating: user.rating,
       usedLinks: user.usedLinks,
       createdAt: user.createdAt,
@@ -92,8 +96,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-
-
 // 🔹 User logout (Clear Session)
 router.post("/logout", (req, res) => {
   req.session.destroy((err) => {
@@ -109,7 +111,7 @@ router.put("/:id/role", async (req, res) => {
   try {
     const { role } = req.body;
 
-    if (!["organizer", "volunteer", "staff"].includes(role)) {
+    if (!["organizer", "volunteer", "staff"].includes(role.toLowerCase())) {
       return res.status(400).json({ error: "Invalid role" });
     }
 
@@ -118,7 +120,7 @@ router.put("/:id/role", async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    user.role = role;
+    user.role = role.toLowerCase();
     await user.save();
     res.json(user);
   } catch (err) {

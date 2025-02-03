@@ -10,27 +10,32 @@ router.post("/:eventId/jobs", isOrganizer, async (req, res) => {
     const { title, description, role } = req.body;
     const { eventId } = req.params;
 
-    // ✅ Validate role type
-    if (!["volunteer", "staff"].includes(role.toLowerCase())) {
-      return res.status(400).json({ error: "Invalid role type. Must be 'volunteer' or 'staff'." });
+    // ✅ Validate role type (ensure it matches ENUM case in DB)
+    const validRoles = ["volunteer", "staff"];
+    if (!role || !validRoles.includes(role.toLowerCase())) {
+      return res.status(400).json({ error: `Invalid role type. Must be one of: ${validRoles.join(", ")}` });
     }
 
     // ✅ Check if event exists
     const event = await Event.findByPk(eventId);
     if (!event) {
-      return res.status(404).json({ error: "Event not found" });
+      return res.status(404).json({ error: "Event not found. Cannot add job posting." });
     }
 
     // ✅ Create job posting
     const jobPosting = await JobPosting.create({
       title,
       description,
-      role: role.toLowerCase(), // Store role in lowercase for consistency
+      role: role.toLowerCase(), // Ensure consistent case
       eventId,
     });
 
-    res.status(201).json(jobPosting);
+    res.status(201).json({
+      message: "✅ Job posting created successfully!",
+      jobPosting,
+    });
   } catch (err) {
+    console.error("❌ Error creating job posting:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -44,7 +49,7 @@ router.get("/:eventId/jobs", async (req, res) => {
     // ✅ Check if event exists
     const event = await Event.findByPk(eventId);
     if (!event) {
-      return res.status(404).json({ error: "Event not found" });
+      return res.status(404).json({ error: "Event not found. Cannot retrieve job postings." });
     }
 
     // ✅ Build filter criteria (optional role filtering)
@@ -64,8 +69,12 @@ router.get("/:eventId/jobs", async (req, res) => {
       return res.status(404).json({ error: "No job postings found for this event and role." });
     }
 
-    res.json(jobPostings);
+    res.json({
+      message: "✅ Job postings retrieved successfully!",
+      jobPostings,
+    });
   } catch (err) {
+    console.error("❌ Error fetching job postings:", err);
     res.status(500).json({ error: err.message });
   }
 });

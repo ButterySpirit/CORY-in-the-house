@@ -5,6 +5,7 @@ const { sequelize } = require("./models"); // Import Sequelize instance
 const userRoutes = require("./routes/users"); // User routes
 const eventRoutes = require("./routes/events"); // Event routes
 const jobPostingRoutes = require("./routes/jobPostings"); // Job Posting routes
+const jobApplicationRoutes = require("./routes/jobApplications"); // ✅ Job Application routes
 
 const app = express();
 
@@ -35,7 +36,8 @@ app.use((req, res, next) => {
 // 🔹 Integrate API Routes
 app.use("/users", userRoutes); // Handles user-related actions
 app.use("/events", eventRoutes); // Handles event creation
-app.use("/events", jobPostingRoutes); // ✅ Job postings are under events
+app.use("/events", jobPostingRoutes); // Job postings are under events
+app.use("/applications", jobApplicationRoutes); // ✅ Integrate Job Application Routes
 
 // Start server
 const PORT = process.env.PORT || 3000;
