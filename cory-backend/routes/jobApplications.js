@@ -1,40 +1,13 @@
 const express = require("express");
-const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
 const { JobApplication, User, JobPosting } = require("../models");
 const { isUser, isOrganizer } = require("../middlewares/authMiddleware");
+const uploadResume = require("../middlewares/uploadMiddleware"); // ✅ Import Upload Middleware
 
 const router = express.Router();
 
-// 🔹 Ensure `uploads/resumes` directory exists
-const resumeUploadPath = path.join(__dirname, "../uploads/resumes");
-if (!fs.existsSync(resumeUploadPath)) {
-  fs.mkdirSync(resumeUploadPath, { recursive: true });
-}
-
-// 🔹 Configure Multer for Resume Uploads
-const storage = multer.diskStorage({
-  destination: resumeUploadPath,
-  filename: (req, file, cb) => {
-    cb(null, `${req.session.userId}-${Date.now()}${path.extname(file.originalname)}`);
-  },
-});
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // ✅ Limit file size to 5MB
-  fileFilter: (req, file, cb) => {
-    const allowedExtensions = [".pdf", ".doc", ".docx"];
-    if (!allowedExtensions.includes(path.extname(file.originalname).toLowerCase())) {
-      return cb(new Error("Only .pdf, .doc, and .docx files are allowed!"));
-    }
-    cb(null, true);
-  },
-});
-
-// 🔹 Apply for a Job Posting (Resume Required for Staff Jobs)
-router.post("/:jobPostingId/apply", isUser, upload.single("resume"), async (req, res) => {
+// 🔹 Apply for a Job Posting (Resume Required for Staff, Optional for Volunteer)
+router.post("/:jobPostingId/apply", isUser, uploadResume.single("resume"), async (req, res) => {
   try {
     const { jobPostingId } = req.params;
     const userId = req.session.userId;
@@ -45,18 +18,20 @@ router.post("/:jobPostingId/apply", isUser, upload.single("resume"), async (req,
       return res.status(404).json({ error: "Job posting not found" });
     }
 
-    // ✅ Prevent Duplicate Applications
+    // ✅ Prevent duplicate applications
     const existingApplication = await JobApplication.findOne({ where: { jobPostingId, userId } });
     if (existingApplication) {
       return res.status(400).json({ error: "You have already applied for this job." });
     }
 
-    // ✅ Require Resume for Staff Jobs
+    // ✅ Handle Resume Upload Logic
     let resumePath = null;
     if (jobPosting.role === "staff") {
       if (!req.file) {
         return res.status(400).json({ error: "A resume is required for staff applications." });
       }
+      resumePath = `/uploads/resumes/${req.file.filename}`; // ✅ Correctly store resume in `/uploads/resumes/`
+    } else if (jobPosting.role === "volunteer" && req.file) {
       resumePath = `/uploads/resumes/${req.file.filename}`;
     }
 
@@ -65,7 +40,7 @@ router.post("/:jobPostingId/apply", isUser, upload.single("resume"), async (req,
       userId,
       jobPostingId,
       status: "pending",
-      resume: resumePath, // ✅ Store resume path in database
+      resume: resumePath || null, // ✅ Resume is optional for volunteers
     });
 
     res.status(201).json({ message: "Application submitted successfully!", jobApplication });
@@ -74,17 +49,31 @@ router.post("/:jobPostingId/apply", isUser, upload.single("resume"), async (req,
   }
 });
 
-// 🔹 Get All Applications for a Job Posting (Organizer Only)
+// 🔹 Get All Applications for a Specific Job Posting (Includes Resume URLs)
 router.get("/:jobPostingId/applications", isOrganizer, async (req, res) => {
   try {
     const { jobPostingId } = req.params;
 
+    // ✅ Fetch job applications including resume file paths
     const applications = await JobApplication.findAll({
       where: { jobPostingId },
-      include: [{ model: User, attributes: ["id", "username", "email"] }],
+      include: [
+        {
+          model: User,
+          attributes: ["id", "username", "email"],
+        },
+      ],
     });
 
-    res.json(applications);
+    // ✅ Modify response to include full resume URLs
+    const formattedApplications = applications.map((app) => ({
+      id: app.id,
+      user: app.User,
+      status: app.status,
+      resumeUrl: app.resume ? `http://localhost:3000${app.resume}` : null, // ✅ Provide full resume URL
+    }));
+
+    res.json(formattedApplications);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

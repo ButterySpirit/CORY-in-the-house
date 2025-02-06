@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const session = require("express-session");
+const path = require("path");
 const { sequelize } = require("./models"); // Import Sequelize instance
 const userRoutes = require("./routes/users"); // User routes
 const eventRoutes = require("./routes/events"); // Event routes
@@ -12,22 +13,27 @@ const app = express();
 // 🔹 Use Sessions to Track Logged-In Users
 app.use(
   session({
-    secret: "your-secret-key", // Change this to a secure key
+    secret: process.env.SESSION_SECRET || "your-secret-key", // ✅ Uses environment variable for security
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false }, // Set to `true` if using HTTPS
   })
 );
 
-// Middleware
-app.use(express.json()); // Parse JSON requests
+// 🔹 Middleware
+app.use(express.json()); // ✅ Parses JSON requests
+app.use(express.urlencoded({ extended: true })); // ✅ Supports URL-encoded form data
 
-// Test route
+// 🔹 Serve Resume Files for Download
+app.use("/uploads/resumes", express.static(path.join(__dirname, "uploads/resumes"))); // ✅ Serve resumes
+
+
+// 🔹 Test Route
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to CORY Backend!" });
 });
 
-// 🔹 Middleware to Log Session Data
+// 🔹 Middleware to Log Session Data (For Debugging)
 app.use((req, res, next) => {
   console.log("🛠️ Session Data:", req.session);
   next();
@@ -36,7 +42,7 @@ app.use((req, res, next) => {
 // 🔹 Integrate API Routes
 app.use("/users", userRoutes); // Handles user-related actions
 app.use("/events", eventRoutes); // Handles event creation
-app.use("/events", jobPostingRoutes); // Job postings are under events
+app.use("/jobPostings", jobPostingRoutes); // ✅ Job postings have a separate route
 app.use("/applications", jobApplicationRoutes); // ✅ Integrate Job Application Routes
 
 // Start server

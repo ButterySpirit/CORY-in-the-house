@@ -1,16 +1,25 @@
+version: '3.8'
+
 services:
   postgres:
     image: postgres:15
     container_name: cory_postgres
     restart: always
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: cory_dev
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
     ports:
       - "5432:5432"
     networks:
       - cory_network
+    volumes:
+      - pgdata:/var/lib/postgresql/data  # ✅ Persistent PostgreSQL Data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      interval: 10s
+      retries: 5
+      timeout: 5s
 
   backend:
     build:
@@ -21,15 +30,24 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy  # ✅ Wait until PostgreSQL is ready
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USERNAME: admin
-      DB_PASSWORD: password
-      DB_DATABASE: cory_dev
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE}
+      UPLOADS_DIR: /app/uploads/resumes  # ✅ Set directory for uploaded files
     networks:
       - cory_network
+    volumes:
+      - ./uploads:/app/uploads  # ✅ Persist uploaded files
+    command: ["npm", "start"]  # ✅ Removed "npm run migrate" so you can run it manually
 
 networks:
   cory_network:
+
+volumes:
+  pgdata:  # ✅ PostgreSQL persistent storage
+  uploads:  # ✅ Uploaded files persistent storage
