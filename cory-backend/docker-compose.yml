@@ -35,19 +35,38 @@ services:
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
+      SESSION_SECRET: ${SESSION_SECRET}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_DATABASE: ${DB_DATABASE}
       UPLOADS_DIR: /app/uploads/resumes  # ✅ Set directory for uploaded files
+      NODE_ENV: development
     networks:
       - cory_network
     volumes:
       - ./uploads:/app/uploads  # ✅ Persist uploaded files
     command: ["npm", "start"]  # ✅ Removed "npm run migrate" so you can run it manually
 
+
+  pgadmin:  # ✅ New pgAdmin service
+    image: dpage/pgadmin4
+    container_name: cory_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@cory.com  # Change as needed
+      PGADMIN_DEFAULT_PASSWORD: admin  # Change as needed
+    ports:
+      - "5050:80"  # ✅ pgAdmin will be accessible on http://localhost:5050
+    depends_on:
+      - postgres
+    networks:
+      - cory_network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
 networks:
   cory_network:
 
 volumes:
   pgdata:  # ✅ PostgreSQL persistent storage
   uploads:  # ✅ Uploaded files persistent storage
+  pgadmin_data:  # ✅ Persistent pgAdmin storage

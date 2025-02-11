@@ -4,10 +4,11 @@ FROM node:20
 # Set working directory
 WORKDIR /app
 
-
-# Copy package files and install dependencies
+# Copy package.json and package-lock.json first (to optimize layer caching)
 COPY package*.json ./
-RUN npm install
+
+# Install dependencies
+RUN npm install --only=production  # ✅ Install only production dependencies
 
 # Copy the rest of the application files
 COPY . .
@@ -15,5 +16,8 @@ COPY . .
 # Expose the backend port
 EXPOSE 3000
 
-# Command to start the app
+# Define environment variables explicitly (optional)
+ENV NODE_ENV=production
+
+# Start the app
 CMD ["node", "index.js"]

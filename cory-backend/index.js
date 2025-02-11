@@ -47,8 +47,13 @@ app.use("/applications", jobApplicationRoutes); // ✅ Integrate Job Application
 
 // Start server
 const PORT = process.env.PORT || 3000;
-sequelize.sync().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server is running on http://localhost:${PORT}`);
+sequelize.authenticate()
+  .then(() => {
+    console.log("✅ Database connected successfully.");
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is running on http://localhost:${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error("❌ Database connection failed:", err);
   });
-});

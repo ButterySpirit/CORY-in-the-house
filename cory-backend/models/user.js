@@ -43,11 +43,6 @@ module.exports = (sequelize, DataTypes) => {
           max: 5, // ✅ Ensure rating is between 0 and 5
         },
       },
-      usedLinks: {
-        type: DataTypes.ARRAY(DataTypes.UUID),
-        allowNull: false,
-        defaultValue: [], // ✅ Array to store clicked links
-      },
     },
     {
       hooks: {
