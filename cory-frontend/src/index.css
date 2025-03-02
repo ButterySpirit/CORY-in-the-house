@@ -1,6 +1,12 @@
+/* ✅ Move `@import` to the very top */
+@import "@radix-ui/themes/styles.css";
+
+/* Your Tailwind imports */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Import Radix UI Themes */
-@import "@radix-ui/themes/styles.css";
+/* ✅ Now, custom styles can come below */
+body {
+  @apply bg-gray-100 text-gray-900;
+}
