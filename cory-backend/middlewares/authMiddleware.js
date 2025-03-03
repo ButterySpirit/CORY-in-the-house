@@ -21,6 +21,8 @@ const isUser = async (req, res, next) => {
   }
 };
 
+
+
 // 🔹 Check if User is an Organizer
 const isOrganizer = async (req, res, next) => {
   try {

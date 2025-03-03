@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
@@ -6,6 +6,29 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  // ✅ Check if user is already logged in
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/users/session", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        const data = await response.json();
+        console.log("🔍 Session Check:", data);
+
+        if (data.user) {
+          navigate("/", { replace: true }); // ✅ Redirect to home if logged in
+        }
+      } catch (err) {
+        console.error("Session check failed:", err);
+      }
+    };
+
+    checkSession();
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -23,7 +46,13 @@ export default function Login() {
 
       if (response.ok) {
         console.log("✅ Login successful:", data);
-        navigate("/"); // Redirect after login
+
+        // ✅ Navigate first, then refresh to update navbar
+        navigate("/", { replace: true });
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 10);
       } else {
         setError(data.error || "Login failed. Please check your credentials.");
       }
