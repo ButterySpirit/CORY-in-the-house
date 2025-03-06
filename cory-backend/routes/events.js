@@ -45,6 +45,24 @@ router.get("/", async (req, res) => {
   }
 });
 
+// 🔹 Get all events created by the logged-in organizer
+router.get("/my-events", isOrganizer, async (req, res) => {
+  try {
+    const events = await Event.findAll({
+      where: { organizerId: req.user.id },
+      include: {
+        model: User,
+        attributes: ["id", "username", "email", "role"], // ✅ Hide sensitive data
+      }
+    });
+
+    res.json(events);
+  } catch (err) {
+    console.error("❌ Error fetching organizer's events:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // 🔹 Get a specific event by ID
 router.get("/:id", async (req, res) => {
   try {

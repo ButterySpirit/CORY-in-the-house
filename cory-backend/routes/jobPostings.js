@@ -4,8 +4,8 @@ const { isOrganizer } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-// 🔹 Organizer Adds a Job Posting to an Event
-router.post("/:eventId/jobs", isOrganizer, async (req, res) => {
+// 🔹 Organizer Adds a Job Posting to an Event (✅ Now uses `/create`)
+router.post("/:eventId/jobs/create", isOrganizer, async (req, res) => {
   try {
     const { title, description, role } = req.body;
     const { eventId } = req.params;
@@ -20,6 +20,11 @@ router.post("/:eventId/jobs", isOrganizer, async (req, res) => {
     const event = await Event.findByPk(eventId);
     if (!event) {
       return res.status(404).json({ error: "Event not found. Cannot add job posting." });
+    }
+
+    // ✅ Ensure only the event organizer can create jobs
+    if (event.organizerId !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized: Only the event organizer can create job postings." });
     }
 
     // ✅ Create job posting
