@@ -7,7 +7,7 @@ export default function ViewEvent() {
   const { user } = useAuth(); // Get logged-in user
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // 🔹 Handle errors properly
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetch(`http://localhost:3000/events/${id}`)
@@ -63,13 +63,11 @@ export default function ViewEvent() {
           <Link to={`/events/${id}/jobs/create`} className="bg-green-500 text-white px-4 py-2 rounded">
             Create Job Posting
           </Link>
-          <Link to={`/events/${id}/applications`} className="bg-purple-500 text-white px-4 py-2 rounded">
-            View Applications
-          </Link>
+          
         </div>
       )}
 
-      {/* 🔹 View Jobs (Correctly Linked to `ViewJobs.jsx`) */}
+      {/* 🔹 View Jobs */}
       <div className="mt-4">
         <Link to={`/jobPostings/${id}/jobs`} className="bg-gray-500 text-white px-4 py-2 rounded">
           View Jobs

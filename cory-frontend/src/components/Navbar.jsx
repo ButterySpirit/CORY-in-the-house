@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext"; // ✅ Import Auth Context
-import { Button, Flex, Box } from "@radix-ui/themes";
-import { Plus, List } from "lucide-react"; // ✅ Import Icons for Event Creation & My Events
+import { Button, Flex } from "@radix-ui/themes";
+import { Plus, List, Calendar } from "lucide-react"; // ✅ Import Icons
 
 export default function Navbar() {
   const { user, logout, loading } = useAuth(); // ✅ Include `loading`
@@ -48,6 +48,16 @@ export default function Navbar() {
                   <List size={24} className="text-green-600 hover:text-green-800 cursor-pointer" />
                   <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-900 text-white text-xs rounded px-2 py-1 transition-opacity">
                     My Events
+                  </span>
+                </Link>
+              )}
+
+              {/* ✅ Show "View All Events" button ONLY if user is staff */}
+              {user.role === "staff" && (
+                <Link to="/events" className="relative group">
+                  <Calendar size={24} className="text-purple-600 hover:text-purple-800 cursor-pointer" />
+                  <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-900 text-white text-xs rounded px-2 py-1 transition-opacity">
+                    View All Events
                   </span>
                 </Link>
               )}

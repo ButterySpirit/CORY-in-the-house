@@ -10,6 +10,9 @@ import OrganizerEvents from "./pages/OrganizerEvents";
 import ViewEvent from "./pages/ViewEvent";
 import ViewJobs from "./pages/ViewJobs";
 import CreateJobPosting from "./pages/CreateJobPosting"; 
+import ViewAllEvents from "./pages/ViewAllEvents"; 
+import ApplyForJob from "./pages/ApplyForJob"; 
+import ViewApplications from "./pages/ViewApplications"; // Import the page
 
 export default function AppRouter() {
   return (
@@ -32,6 +35,11 @@ export default function AppRouter() {
           {/* ✅ Job Posting Routes */}
           <Route path="/jobPostings/:id/jobs" element={<ViewJobs />} /> {/* ✅ View Jobs for an Event */}
           <Route path="/events/:id/jobs/create" element={<CreateJobPosting />} /> {/* ✅ Create Job Posting */}
+          <Route path="/events" element={<ViewAllEvents />} /> {/* ✅ Add this */}
+          <Route path="/jobPostings/:id/jobs/:jobId/apply" element={<ApplyForJob />} /> {/* ✅ Add this */}
+          <Route path="/jobPostings/:id/jobs/:jobId/applications" element={<ViewApplications />} />
+
+
         </Routes>
       </main>
     </Router>

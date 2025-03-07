@@ -5,9 +5,9 @@ import { useAuth } from "../context/AuthContext";
 export default function ViewJobs() {
   const { id } = useParams(); // Event ID
   const { user } = useAuth(); // Get logged-in user
-  const [jobs, setJobs] = useState(null); // ✅ Start as null to handle loading correctly
+  const [jobs, setJobs] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); 
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetch(`http://localhost:3000/jobPostings/${id}/jobs`, {
@@ -24,11 +24,11 @@ export default function ViewJobs() {
         return res.json();
       })
       .then((data) => {
-        console.log("🔹 API Response:", data); // ✅ Debugging log
+        console.log("🔹 API Response:", data);
         if (data.jobPostings && Array.isArray(data.jobPostings)) {
-          setJobs(data.jobPostings); // ✅ Set correctly
+          setJobs(data.jobPostings);
         } else {
-          setJobs([]); // ✅ Ensure an empty array if no jobs exist
+          setJobs([]);
         }
         setLoading(false);
       })
@@ -39,7 +39,7 @@ export default function ViewJobs() {
       });
   }, [id]);
 
-  console.log("🔹 State: jobs =", jobs); // ✅ Log the state for debugging
+  console.log("🔹 State: jobs =", jobs);
 
   if (loading) return <p>Loading jobs...</p>;
   if (error) return <p className="text-red-500">⚠️ {error}</p>;
@@ -51,18 +51,19 @@ export default function ViewJobs() {
 
       <ul className="space-y-4">
         {jobs.map((job) => {
-          // ✅ Check if job data exists
           console.log("✅ Rendering Job:", job);
 
-          // 🔹 Determine the correct route based on user role
+          // 🔹 Corrected Paths to View Applications Page
           let jobLink = `/jobPostings/${id}/jobs/${job.id}/apply`; // Default for volunteers/staff
           if (user?.role === "organizer") {
-            jobLink = `/jobPostings/${id}/jobs/${job.id}/applications`; // Organizers see applications
+            jobLink = `/jobPostings/${id}/jobs/${job.id}/applications`; // Organizers view applications
           }
 
           return (
             <li key={job.id} className="border p-4 rounded-lg shadow">
-              <h3 className="text-lg font-semibold">{job.title} ({job.role})</h3>
+              <h3 className="text-lg font-semibold">
+                {job.title} ({job.role})
+              </h3>
               <p className="text-gray-600">{job.description}</p>
 
               <Link to={jobLink} className="text-blue-500 underline">

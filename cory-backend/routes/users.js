@@ -15,9 +15,8 @@ router.post("/", async (req, res) => {
     const validRoles = ["organizer", "volunteer", "staff"];
     const userRole = validRoles.includes(role?.toLowerCase()) ? role.toLowerCase() : "volunteer";
 
-    // ✅ Hash the password before saving
-    const hashedPassword = await bcryptjs.hash(password, 10);
-    const user = await User.create({ username, email, password: hashedPassword, role: userRole });
+    // ❌ Don't hash the password manually (Sequelize hooks do this already!)
+    const user = await User.create({ username, email, password, role: userRole });
 
     res.status(201).json({
       id: user.id,
@@ -29,11 +28,12 @@ router.post("/", async (req, res) => {
       updatedAt: user.updatedAt,
     });
   } catch (err) {
+    console.error("❌ Error creating user:", err);
     res.status(400).json({ error: err.message });
   }
 });
 
-// 🔹 **Fix: Session Route - Retrieve Logged-In User**
+// 🔹 **Retrieve Logged-In User Session**
 router.get("/session", async (req, res) => {
   try {
     if (!req.session.userId) {
@@ -50,7 +50,7 @@ router.get("/session", async (req, res) => {
     }
 
     const user = await User.findOne({
-      where: { id: { [Op.eq]: req.session.userId } }, // ✅ Ensure UUID check
+      where: { id: { [Op.eq]: req.session.userId } },
     });
 
     if (!user) {
@@ -72,20 +72,29 @@ router.get("/session", async (req, res) => {
   }
 });
 
-// 🔹 **Fix: Login Route - Store Valid UUID in Session**
+// 🔹 **Login Route - Store Valid UUID in Session**
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user by email
+    // Find user by email (use the scope that includes the password!)
     const user = await User.scope("withPassword").findOne({ where: { email } });
-    if (!user || !(await bcryptjs.compare(password, user.password))) {
+
+    if (!user) {
+      console.log("❌ No user found with email:", email);
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    // ✅ Compare password with the hashed version
+    const isMatch = await bcryptjs.compare(password, user.password);
+    if (!isMatch) {
+      console.log("❌ Password does not match for user:", email);
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
     // ✅ Store UUID in session
     req.session.userId = user.id;
-    console.log("✅ Storing logged-in User ID in session:", req.session.userId);
+    console.log("✅ User logged in:", user.id);
 
     res.json({
       message: "Login successful",
@@ -118,6 +127,7 @@ router.get("/", async (req, res) => {
     const users = await User.findAll();
     res.json(users);
   } catch (err) {
+    console.error("❌ Error fetching users:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -131,6 +141,7 @@ router.get("/:id", async (req, res) => {
     }
     res.json(user);
   } catch (err) {
+    console.error("❌ Error fetching user:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -144,6 +155,7 @@ router.delete("/:id", async (req, res) => {
     }
     res.json({ message: "User deleted successfully" });
   } catch (err) {
+    console.error("❌ Error deleting user:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -165,6 +177,7 @@ router.put("/:id/role", async (req, res) => {
     await user.save();
     res.json(user);
   } catch (err) {
+    console.error("❌ Error updating role:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -187,6 +200,7 @@ router.put("/:id/rating", async (req, res) => {
     await user.save();
     res.json(user);
   } catch (err) {
+    console.error("❌ Error updating rating:", err);
     res.status(500).json({ error: err.message });
   }
 });
