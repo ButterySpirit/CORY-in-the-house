@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 export default function ViewApplications() {
   const { jobId } = useParams(); // Get job ID from URL
   const { user } = useAuth(); // Logged-in user (organizer)
-  
+
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,12 +17,10 @@ export default function ViewApplications() {
       return;
     }
 
-    fetch(`http://localhost:3000/applications/${jobId}/applications`, {
+    fetch(`http://localhost:3000/jobApplications/${jobId}/applications`, {
       method: "GET",
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
     })
       .then((res) => {
         if (!res.ok) {
@@ -53,17 +51,30 @@ export default function ViewApplications() {
       <ul className="space-y-4">
         {applications.map((app) => (
           <li key={app.id} className="border p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold">Applicant: {app.applicant?.username || "Unknown"}</h3>
-            <p className="text-gray-600"><strong>Cover Letter:</strong> {app.coverLetter}</p>
+            {/* ✅ Display applicant name & email */}
+            <h3 className="text-lg font-semibold">
+              Applicant: {app.user?.username || "Unknown"}
+            </h3>
+            <p className="text-gray-600">
+              <strong>Email:</strong> {app.user?.email || "Not provided"}
+            </p>
 
-            <a
-            href={app.resumeUrl} // ✅ Use `resumeUrl` directly, no need to prepend anything
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 underline"
-            >
-            📄 Download Resume
-            </a>
+            {/* ✅ Display application status */}
+            <p className="text-gray-600">
+              <strong>Status:</strong> {app.status}
+            </p>
+
+            {/* ✅ Resume Download Link (if available) */}
+            {app.resumeUrl && (
+              <a
+                href={app.resumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 underline"
+              >
+                📄 Download Resume
+              </a>
+            )}
           </li>
         ))}
       </ul>

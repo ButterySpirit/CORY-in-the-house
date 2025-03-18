@@ -1,7 +1,7 @@
 import { Theme } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 import "./index.css"; // Ensure Tailwind works
-import AppRouter from "./Router";
+import AppRouter from "./router/Router";
 import { AuthProvider } from "./context/AuthContext"; // ✅ Fix Import
 
 export default function App() {

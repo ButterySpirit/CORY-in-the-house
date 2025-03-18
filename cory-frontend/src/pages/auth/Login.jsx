@@ -20,7 +20,14 @@ export default function Login() {
         console.log("🔍 Session Check:", data);
 
         if (data.user) {
-          navigate("/", { replace: true }); // ✅ Redirect to home if logged in
+          // ✅ Redirect based on user role
+          if (data.user.role === "organizer") {
+            navigate("/organizer-dashboard", { replace: true });
+          } else if (data.user.role === "staff") {
+            navigate("/staff-dashboard", { replace: true });
+          } else {
+            navigate("/volunteer-dashboard", { replace: true });
+          }
         }
       } catch (err) {
         console.error("Session check failed:", err);
@@ -47,12 +54,14 @@ export default function Login() {
       if (response.ok) {
         console.log("✅ Login successful:", data);
 
-        // ✅ Navigate first, then refresh to update navbar
-        navigate("/", { replace: true });
-
-        setTimeout(() => {
-          window.location.reload();
-        }, 10);
+        if (data.role === "organizer") {
+          navigate("/organizer-dashboard", { replace: true });
+        } else if (data.role === "staff") {
+          navigate("/staff-dashboard", { replace: true });
+        } else {
+          navigate("/volunteer-dashboard", { replace: true });
+        }
+        
       } else {
         setError(data.error || "Login failed. Please check your credentials.");
       }

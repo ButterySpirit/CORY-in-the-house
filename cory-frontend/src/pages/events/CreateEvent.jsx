@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext"; // ✅ Get user from context
+import { useAuth } from "../../context/AuthContext"; // ✅ Get user from context
 import { useNavigate } from "react-router-dom";
 
 export default function CreateEvent() {
