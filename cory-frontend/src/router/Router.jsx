@@ -6,9 +6,14 @@ import Signup from "../pages/auth/Signup";
 import OrganizerDashboard from "../pages/dashboard/OrganizerDashboard";
 import StaffDashboard from "../pages/dashboard/StaffDashboard";
 import VolunteerDashboard from "../pages/dashboard/VolunteerDashboard";
+import ViewApplications from "../pages/ViewApplications"; // ✅ Added this if needed
 
 export default function AppRouter() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <p className="text-center mt-10 text-gray-600">Loading...</p>; // ✅ Prevents flashing before auth loads
+  }
 
   return (
     <Router>
@@ -18,16 +23,25 @@ export default function AppRouter() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* Role-Based Dashboard Navigation */}
+        {/* Protected Routes (Require Auth) */}
         {user ? (
           <>
-            {user.role === "organizer" && <Route path="/dashboard" element={<OrganizerDashboard />} />}
-            {user.role === "staff" && <Route path="/dashboard" element={<StaffDashboard />} />}
-            {user.role === "volunteer" && <Route path="/dashboard" element={<VolunteerDashboard />} />}
+            <Route path="/organizer-dashboard" element={<OrganizerDashboard />} />
+            <Route path="/staff-dashboard" element={<StaffDashboard />} />
+            <Route path="/volunteer-dashboard" element={<VolunteerDashboard />} />
+            <Route path="/applications" element={<ViewApplications />} />
           </>
         ) : (
-          <Route path="/dashboard" element={<Navigate to="/login" />} />
+          <>
+            <Route path="/organizer-dashboard" element={<Navigate to="/login" />} />
+            <Route path="/staff-dashboard" element={<Navigate to="/login" />} />
+            <Route path="/volunteer-dashboard" element={<Navigate to="/login" />} />
+            <Route path="/applications" element={<Navigate to="/login" />} />
+          </>
         )}
+
+        {/* Catch All: Redirect unknown routes to home */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );
