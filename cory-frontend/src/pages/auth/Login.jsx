@@ -19,15 +19,8 @@ export default function Login() {
         const data = await response.json();
         console.log("🔍 Session Check:", data);
 
-        if (data.user) {
-          // ✅ Redirect based on user role
-          if (data.user.role === "organizer") {
-            navigate("/organizer-dashboard", { replace: true });
-          } else if (data.user.role === "staff") {
-            navigate("/staff-dashboard", { replace: true });
-          } else {
-            navigate("/volunteer-dashboard", { replace: true });
-          }
+        if (data.user?.role) {
+          redirectToDashboard(data.user.role);
         }
       } catch (err) {
         console.error("Session check failed:", err);
@@ -37,6 +30,20 @@ export default function Login() {
     checkSession();
   }, [navigate]);
 
+  // ✅ Function to redirect user based on role
+  const redirectToDashboard = (role) => {
+    console.log("🔍 Redirecting User with Role:", role);
+
+    if (role === "organizer") {
+      navigate("/organizer-dashboard", { replace: true });
+    } else if (role === "staff") {
+      navigate("/staff-dashboard", { replace: true });
+    } else {
+      navigate("/volunteer-dashboard", { replace: true });
+    }
+  };
+
+  // ✅ Handle Login Submission
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(""); // Clear errors
@@ -50,18 +57,11 @@ export default function Login() {
       });
 
       const data = await response.json();
+      console.log("✅ Login API Response:", data);
 
-      if (response.ok) {
-        console.log("✅ Login successful:", data);
-
-        if (data.role === "organizer") {
-          navigate("/organizer-dashboard", { replace: true });
-        } else if (data.role === "staff") {
-          navigate("/staff-dashboard", { replace: true });
-        } else {
-          navigate("/volunteer-dashboard", { replace: true });
-        }
-        
+      if (response.ok && data.user?.role) {
+        console.log("✅ Successfully Logged In. Redirecting...");
+        redirectToDashboard(data.user.role);
       } else {
         setError(data.error || "Login failed. Please check your credentials.");
       }
