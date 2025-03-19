@@ -27,10 +27,19 @@ export default function Navbar() {
             <>
               {user.role === "organizer" && (
                 <>
-                  <Link to="/create-event" className="icon-button navbar-org">
-                    <Plus size={20} />
-                    <span>Create Event</span>
-                  </Link>
+
+
+<Link
+  to="/create-event"
+  className="icon-button navbar-org"
+  onClick={() => console.log("🟢 Create Event Button Clicked!")}
+>
+  <Plus size={20} />
+  <span>Create Event</span>
+</Link>
+
+
+
                   <Link to="/my-events" className="icon-button navbar-org">
                     <List size={20} />
                     <span>My Events</span>
@@ -75,7 +84,18 @@ export default function Navbar() {
                     <Link to="/profile" className="dropdown-item">Profile</Link>
                   </DropdownMenu.Item>
                   <DropdownMenu.Item asChild>
-                    <Link to="/dashboard" className="dropdown-item">Dashboard</Link>
+                    <Link
+                      to={
+                        user.role === "organizer"
+                          ? "/organizer-dashboard"
+                          : user.role === "staff"
+                          ? "/staff-dashboard"
+                          : "/volunteer-dashboard"
+                      }
+                      className="dropdown-item"
+                    >
+                      Dashboard
+                    </Link>
                   </DropdownMenu.Item>
                   <DropdownMenu.Item onSelect={logout} className="dropdown-item logout">
                     Log Out

@@ -1,52 +1,85 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import DashboardCard from "../../components/DashboardCard";
-import UpcomingEventsList from "../../components/UpcomingEventsList";
-import RecentApplicationsList from "../../components/RecentApplicationsList";
-import "../../styles/organizerDashboard.css";
 import Navbar from "../../components/Navbar";
+import "../../styles/organizerDashboard.css"; // ✅ Ensure the correct CSS file is used
 
 export default function OrganizerDashboard() {
-  const [eventCount, setEventCount] = useState(0);
-  const [applicationCount, setApplicationCount] = useState(0);
+  const [events, setEvents] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchStats() {
+    const fetchDashboardData = async () => {
       try {
-        // ✅ Fetch Organizer's Events Count
-        const eventsRes = await fetch("http://localhost:3000/events/my-events", { credentials: "include" });
-        const eventsData = await eventsRes.json();
-        setEventCount(eventsData.length);
-
-        // ✅ Fetch Job Applications Count
-        const applicationsRes = await fetch("http://localhost:3000/jobApplications", { credentials: "include" });
-        const applicationsData = await applicationsRes.json();
-        setApplicationCount(applicationsData.length);
+        console.log("🔍 Fetching Dashboard Data...");
+        
+        const [eventsRes] = await Promise.all([
+          fetch("http://localhost:3000/events/my-events", { credentials: "include" }),
+        ]);
+  
+        const eventsText = await eventsRes.text();
+  
+        console.log("🔍 Raw Events Response:", eventsText);
+  
+        if (!eventsRes.ok) {
+          throw new Error("Failed to load dashboard data");
+        }
+  
+        // ✅ Try parsing as JSON
+        const eventsData = JSON.parse(eventsText);
+  
+        console.log("✅ Events Data:", eventsData);
+  
+        setEvents(eventsData);
       } catch (err) {
-        console.error("❌ Error fetching stats:", err);
+        console.error("❌ Error fetching dashboard data:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-    }
-
-    fetchStats();
+    };
+  
+    fetchDashboardData();
   }, []);
+  
+
+  if (loading) return <p>Loading dashboard...</p>;
+  if (error) return <p className="text-red-500">⚠️ {error}</p>;
 
   return (
-    <div className="dashboard-container">
+    <box>
       <Navbar />
-      {/* ✅ Overview Cards */}
-      <div className="dashboard-overview">
-        <DashboardCard title="Total Events" count={eventCount} />
-        <DashboardCard title="Total Applications" count={applicationCount} />
-      </div>
+      <div className="dashboard-container">
+        <h2 className="dashboard-title">Organizer Dashboard</h2>
 
-      {/* ✅ Upcoming Events */}
-      <div className="dashboard-content">
-        <UpcomingEventsList />
-        <RecentApplicationsList />
-      </div>
+        {/* ✅ Create Event Button */}
+        <div className="dashboard-section">
+          <Link to="/create-event" className="create-event-btn">
+            + Create New Event
+          </Link>
+        </div>
 
-      {/* ✅ Floating "Create Event" Button */}
-      <Link to="/create-event" className="floating-button">+ Create Event</Link>
-    </div>
+        {/* ✅ Upcoming Events */}
+        <div className="dashboard-section">
+          <h3>Upcoming Events</h3>
+          <ul>
+            {events.length > 0 ? (
+              events.map((event) => (
+                <li key={event.id} className="dashboard-card">
+                  <p><strong>{event.title}</strong></p>
+                  <p>{new Date(event.date).toLocaleDateString()}</p>
+                  <Link to={`/events/${event.id}`} className="view-details-btn">
+                    View Event
+                  </Link>
+                </li>
+              ))
+            ) : (
+              <p>No upcoming events.</p>
+            )}
+          </ul>
+        </div>
+      </div>
+    </box>
   );
 }

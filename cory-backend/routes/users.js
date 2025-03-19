@@ -51,7 +51,9 @@ router.get("/session", async (req, res) => {
 
     const user = await User.findOne({
       where: { id: { [Op.eq]: req.session.userId } },
+      attributes: ["id", "username", "email", "role"], // ✅ Ensure role is included
     });
+    
 
     if (!user) {
       console.log("❌ User not found in session:", req.session.userId);

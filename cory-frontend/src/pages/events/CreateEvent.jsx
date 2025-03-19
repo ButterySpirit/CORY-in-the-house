@@ -32,7 +32,7 @@ export default function CreateEvent() {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(eventData),
+        body: JSON.stringify({ ...eventData, organizerId: user.id }),
       });
 
       const data = await response.json();

@@ -1,0 +1,422 @@
+{
+	"info": {
+		"_postman_id": "1b94014e-bfa0-4a09-a7a7-df2cfc481e86",
+		"name": "CORY Backend API",
+		"description": "Comprehensive Postman collection for testing CORY backend endpoints, including edge cases and error handling.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38559353"
+	},
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "✅ Create User (Valid)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"apptest\",\n  \"email\": \"test3@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"staff\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Create User (Missing Fields)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "✅ Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "✅ Login User (Valid)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test1@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Login User (Invalid Credentials)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"wrong@example.com\",\n  \"password\": \"wrongpassword\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "✅ Logout User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"johndoe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"volunteer\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Events",
+			"item": [
+				{
+					"name": "✅ Create Event (Valid)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Technology Conference 2149\",\n  \"description\": \"A mid-scale tech conference.\",\n  \"date\": \"2149-05-20\",\n  \"location\": \"San Francisco\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/events",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"events"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Create Event (Missing Fields)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/events",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"events"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "✅ Get All Events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/events",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"events"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Job Postings",
+			"item": [
+				{
+					"name": "✅ Create Job Posting",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Head of Security\",\n  \"description\": \"Manage event security.\",\n  \"role\": \"staff\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/jobPostings/b0cafb16-a38c-4479-8c95-3a316c055f83/jobs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jobPostings",
+								"b0cafb16-a38c-4479-8c95-3a316c055f83",
+								"jobs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "✅ Get Job Postings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/jobPostings/b0cafb16-a38c-4479-8c95-3a316c055f83/jobs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"jobPostings",
+								"b0cafb16-a38c-4479-8c95-3a316c055f83",
+								"jobs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Job Posting by Role",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/events/6cdb3ebd-11c6-49d8-822e-2812cc74ae2c/jobs?role=volunteer",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"events",
+								"6cdb3ebd-11c6-49d8-822e-2812cc74ae2c",
+								"jobs"
+							],
+							"query": [
+								{
+									"key": "role",
+									"value": "volunteer"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Job Applications",
+			"item": [
+				{
+					"name": "Get Applications for a Job Posting",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/applications/1f76865b-9af5-439d-82fe-d2af42d6c5d6/applications",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"applications",
+								"1f76865b-9af5-439d-82fe-d2af42d6c5d6",
+								"applications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Apply for Staff Job",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "resume",
+									"type": "file",
+									"src": "/Users/sebastianvaron/Documents/T177/VI/COMP3078 - CAPSTONE/Portfolio/W25_COMP3078_Portfolio_Development.docx"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/applications/1f76865b-9af5-439d-82fe-d2af42d6c5d6/apply",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"applications",
+								"1f76865b-9af5-439d-82fe-d2af42d6c5d6",
+								"apply"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Organizer Updates Application Status",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n \"status\": \"accepted\"   \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/applications/82fca57c-ccfb-4b9c-86ad-8008335e053a/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"applications",
+								"82fca57c-ccfb-4b9c-86ad-8008335e053a",
+								"status"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	]
+}

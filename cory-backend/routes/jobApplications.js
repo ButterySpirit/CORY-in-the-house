@@ -117,4 +117,56 @@ router.put("/:applicationId/status", isOrganizer, async (req, res) => {
   }
 });
 
+// 🔹 Get ALL Job Applications for the Logged-in Organizer's Events
+router.get("/", isOrganizer, async (req, res) => {
+  try {
+    const organizerId = req.session.userId; // ✅ Get logged-in organizer's ID
+    console.log("🔍 Organizer ID:", organizerId);
+
+    // ✅ Find all events created by this organizer
+    const events = await Event.findAll({
+      where: { organizerId },
+      attributes: ["id"],
+    });
+
+    const eventIds = events.map((event) => event.id);
+
+    if (eventIds.length === 0) {
+      console.log("⚠️ No events found for this organizer.");
+      return res.json([]); // ✅ Return empty array if no events exist
+    }
+
+    // ✅ Find all job postings related to those events
+    const jobPostings = await JobPosting.findAll({
+      where: { eventId: eventIds },
+      attributes: ["id"],
+    });
+
+    const jobPostingIds = jobPostings.map((job) => job.id);
+
+    if (jobPostingIds.length === 0) {
+      console.log("⚠️ No job postings found for these events.");
+      return res.json([]); // ✅ Return empty array if no job postings exist
+    }
+
+    // ✅ Fetch applications only for job postings related to organizer's events
+    const applications = await JobApplication.findAll({
+      where: { jobPostingId: jobPostingIds },
+      include: [
+        { model: User, attributes: ["id", "username", "email"] }, // ✅ Applicant details
+        { model: JobPosting, attributes: ["id", "title", "eventId"] }, // ✅ Job details
+      ],
+    });
+
+    console.log("✅ Applications Found:", applications);
+    res.json(applications);
+  } catch (err) {
+    console.error("❌ Error fetching organizer's job applications:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
+
 module.exports = router;
