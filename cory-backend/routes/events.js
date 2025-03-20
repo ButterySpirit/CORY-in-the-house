@@ -104,4 +104,33 @@ router.delete("/:id", isOrganizer, async (req, res) => {
   }
 });
 
+// 🔹 Edit an event (Only the Organizer who created it can edit it)
+router.put("/:id", isOrganizer, async (req, res) => {
+  try {
+    const { title, description, date, location } = req.body;
+    const event = await Event.findByPk(req.params.id);
+
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    // ✅ Only allow the event's organizer to edit
+    if (event.organizerId !== req.user.id) {
+      return res.status(403).json({ error: "You can only edit events you created" });
+    }
+
+    // ✅ Update event
+    event.title = title || event.title;
+    event.description = description || event.description;
+    event.date = date || event.date;
+    event.location = location || event.location;
+    await event.save();
+
+    res.json({ message: "Event updated successfully", event });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 module.exports = router;
