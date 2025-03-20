@@ -1,85 +1,59 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import Navbar from "../../components/Navbar";
+import EventList from "../../components/EventList"; // ✅ Import the reusable EventList component
 import "../../styles/organizerDashboard.css"; // ✅ Ensure the correct CSS file is used
 
 export default function OrganizerDashboard() {
+  const { user } = useAuth();
   const [events, setEvents] = useState([]);
-  const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    if (!user || user.role !== "organizer") return;
+
+    const fetchEvents = async () => {
       try {
-        console.log("🔍 Fetching Dashboard Data...");
-        
-        const [eventsRes] = await Promise.all([
-          fetch("http://localhost:3000/events/my-events", { credentials: "include" }),
-        ]);
-  
-        const eventsText = await eventsRes.text();
-  
-        console.log("🔍 Raw Events Response:", eventsText);
-  
-        if (!eventsRes.ok) {
-          throw new Error("Failed to load dashboard data");
+        console.log("🔍 Fetching Organizer's Events...");
+        const response = await fetch("http://localhost:3000/events/my-events", {
+          credentials: "include",
+        });
+
+        const data = await response.json();
+        console.log("✅ Fetched Events:", data);
+
+        if (!response.ok) {
+          throw new Error("Failed to load events.");
         }
-  
-        // ✅ Try parsing as JSON
-        const eventsData = JSON.parse(eventsText);
-  
-        console.log("✅ Events Data:", eventsData);
-  
-        setEvents(eventsData);
+
+        setEvents(data);
       } catch (err) {
-        console.error("❌ Error fetching dashboard data:", err);
-        setError(err.message);
+        console.error("❌ Error fetching events:", err);
+        setError("Could not load events.");
       } finally {
         setLoading(false);
       }
     };
-  
-    fetchDashboardData();
-  }, []);
-  
 
-  if (loading) return <p>Loading dashboard...</p>;
-  if (error) return <p className="text-red-500">⚠️ {error}</p>;
+    fetchEvents();
+  }, [user]);
+
+  if (loading) return <p className="text-center mt-4">Loading dashboard...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <box>
+    <div>
       <Navbar />
       <div className="dashboard-container">
-        <h2 className="dashboard-title">Organizer Dashboard</h2>
-
-        {/* ✅ Create Event Button */}
+        <h2 className="dashboard-title">My Dashboard</h2>
+        {/* ✅ Upcoming Events Section */}
         <div className="dashboard-section">
-          <Link to="/create-event" className="create-event-btn">
-            + Create New Event
-          </Link>
-        </div>
-
-        {/* ✅ Upcoming Events */}
-        <div className="dashboard-section">
-          <h3>Upcoming Events</h3>
-          <ul>
-            {events.length > 0 ? (
-              events.map((event) => (
-                <li key={event.id} className="dashboard-card">
-                  <p><strong>{event.title}</strong></p>
-                  <p>{new Date(event.date).toLocaleDateString()}</p>
-                  <Link to={`/events/${event.id}`} className="view-details-btn">
-                    View Event
-                  </Link>
-                </li>
-              ))
-            ) : (
-              <p>No upcoming events.</p>
-            )}
-          </ul>
+          <h3>My Events</h3>
+          <EventList events={events} /> {/* ✅ Use EventList for displaying events */}
         </div>
       </div>
-    </box>
+    </div>
   );
 }

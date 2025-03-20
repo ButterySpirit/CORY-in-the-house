@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 export default function ViewEvent() {
-  const { id } = useParams();
-  const { user } = useAuth(); // Get logged-in user
+  const { eventId } = useParams();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:3000/events/${id}`)
+    fetch(`http://localhost:3000/events/${eventId}`)
       .then(async (res) => {
         if (!res.ok) {
           const errorMessage = await res.text();
@@ -27,50 +28,60 @@ export default function ViewEvent() {
         setError(err.message);
         setLoading(false);
       });
-  }, [id]);
+  }, [eventId]);
 
-  if (loading) return <p>Loading event...</p>;
-  if (error) return <p className="text-red-500">⚠️ {error}</p>;
-  if (!event) return <p>Event not found.</p>;
+  if (loading) return <p className="text-center mt-10 text-gray-600">Loading event...</p>;
+  if (error) return <p className="text-center text-red-500">⚠️ {error}</p>;
+  if (!event) return <p className="text-center text-gray-500">Event not found.</p>;
 
-  // 🔹 Check if the logged-in user is the event organizer
   const isOrganizer = user && event.User && user.id === event.User.id;
 
-  return (
-    <div className="container mx-auto mt-10 p-6">
-      <h2 className="text-3xl font-bold mb-4">{event.title}</h2>
-      <p className="text-gray-700">{event.description}</p>
-      <p className="text-gray-600 mt-2">
-        <strong>Date:</strong> {new Date(event.date).toLocaleDateString()}
-      </p>
-      <p className="text-gray-600">
-        <strong>Location:</strong> {event.location}
-      </p>
-      {event.User ? (
-        <p className="text-gray-600">
-          <strong>Organizer:</strong> {event.User.username}
-        </p>
-      ) : (
-        <p className="text-red-500">⚠️ Organizer information unavailable</p>
-      )}
+  // 🔹 Determine Dashboard Route
+  const getDashboardRoute = () => {
+    if (!user) return "/";
+    return user.role === "organizer"
+      ? "/organizer-dashboard"
+      : user.role === "staff"
+      ? "/staff-dashboard"
+      : "/volunteer-dashboard";
+  };
 
-      {/* 🔹 Buttons for Organizer */}
+  return (
+    <div className="max-w-3xl mx-auto mt-12 p-8 bg-white shadow-xl rounded-lg border border-gray-200">
+      {/* 🔹 Back Button */}
+      <button
+        onClick={() => navigate(getDashboardRoute())}
+        className="mb-4 bg-black text-white px-4 py-2 rounded-lg shadow hover:bg-gray-900 transition"
+      >
+        ← Back to Dashboard
+      </button>
+
+      <h2 className="text-4xl font-bold text-gray-900 mb-4">{event.title}</h2>
+      <p className="text-lg text-gray-700 leading-relaxed">{event.description}</p>
+      <div className="mt-5">
+        <p className="text-gray-600"><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
+        <p className="text-gray-600"><strong>Location:</strong> {event.location}</p>
+        {event.User && (
+          <p className="text-gray-600"><strong>Organizer:</strong> {event.User.username}</p>
+        )}
+      </div>
+
+      {/* 🔹 Organizer Actions */}
       {isOrganizer && (
-        <div className="mt-4 space-x-2">
-          <Link to={`/events/${id}/edit`} className="bg-blue-500 text-white px-4 py-2 rounded">
-            Edit Event
+        <div className="mt-6 flex gap-3">
+          <Link to={`/events/${eventId}/edit`} className="bg-black text-white px-5 py-2 rounded-lg shadow hover:bg-gray-900 transition">
+            ✏️ Edit Event
           </Link>
-          <Link to={`/events/${id}/jobs/create`} className="bg-green-500 text-white px-4 py-2 rounded">
-            Create Job Posting
+          <Link to={`/events/${eventId}/jobs/create`} className="bg-black text-white px-5 py-2 rounded-lg shadow hover:bg-gray-900 transition">
+            📌 Create Job Posting
           </Link>
-          
         </div>
       )}
 
-      {/* 🔹 View Jobs */}
-      <div className="mt-4">
-        <Link to={`/jobPostings/${id}/jobs`} className="bg-gray-500 text-white px-4 py-2 rounded">
-          View Jobs
+      {/* 🔹 View Jobs Button */}
+      <div className="mt-6">
+        <Link to={`/jobPostings/${eventId}/jobs`} className="bg-black text-white px-5 py-2 rounded-lg shadow hover:bg-gray-900 transition">
+          🏆 View Jobs
         </Link>
       </div>
     </div>

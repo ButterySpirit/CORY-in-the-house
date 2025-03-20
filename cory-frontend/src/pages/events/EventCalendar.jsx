@@ -1,21 +1,13 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../../context/AuthContext";
 import EventList from "../../components/EventList";
 
-export default function OrganizerEvents() {
-  const { user } = useAuth();
+export default function EventCalendar() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!user || user.role !== "organizer") {
-      setError("Access denied. Only organizers can view this page.");
-      setLoading(false);
-      return;
-    }
-
-    fetch("http://localhost:3000/events/my-events", {
+    fetch("http://localhost:3000/events", {
       method: "GET",
       credentials: "include",
     })
@@ -33,10 +25,10 @@ export default function OrganizerEvents() {
         setError(err.message);
         setLoading(false);
       });
-  }, [user]);
+  }, []);
 
   if (loading) return <p className="text-center mt-10 text-gray-600">Loading events...</p>;
   if (error) return <p className="text-center text-red-500">⚠️ {error}</p>;
 
-  return <EventList events={events} title="My Events" />;
+  return <EventList events={events} title="Event Calendar" />;
 }
