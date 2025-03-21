@@ -1,42 +1,47 @@
 "use strict";
 
+const { v4: uuidv4 } = require("uuid");
+
 module.exports = {
-  up: async (queryInterface) => {
+  up: async (queryInterface, Sequelize) => {
     const now = new Date();
 
-    const jobPostings = await queryInterface.sequelize.query(
-      `SELECT id, role FROM "JobPostings";`,
-      { type: queryInterface.sequelize.QueryTypes.SELECT }
-    );
-
     const staffUserIds = [
-      "55555555-5555-5555-5555-555555555555",
-      "55555555-5555-5555-5555-555555555556",
-      "55555555-5555-5555-5555-555555555557",
+      "22222222-2222-2222-2222-222222222221",
+      "22222222-2222-2222-2222-222222222222",
+      "22222222-2222-2222-2222-222222222223",
     ];
 
     const volunteerUserIds = [
-      "66666666-6666-6666-6666-666666666666",
-      "66666666-6666-6666-6666-666666666667",
-      "66666666-6666-6666-6666-666666666668",
+      "33333333-3333-3333-3333-333333333331",
+      "33333333-3333-3333-3333-333333333332",
+      "33333333-3333-3333-3333-333333333333",
     ];
 
-    const applications = jobPostings.map((job, index) => {
-      const userPool = job.role === "staff" ? staffUserIds : volunteerUserIds;
-      const userId = userPool[index % userPool.length];
+    // 🔹 Get all job postings
+    const jobPostings = await queryInterface.sequelize.query(
+      `SELECT id, role FROM "JobPostings";`,
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+
+    const jobApplications = jobPostings.map((job, index) => {
+      const userId =
+        job.role === "staff"
+          ? staffUserIds[index % staffUserIds.length]
+          : volunteerUserIds[index % volunteerUserIds.length];
 
       return {
-        id: `app-${(index + 1).toString().padStart(3, "0")}`,
+        id: uuidv4(),
         jobPostingId: job.id,
         userId,
         status: "pending",
-        resume: job.role === "staff" ? `/uploads/resumes/resume-${index + 1}.pdf` : null,
+        resume: null,
         createdAt: now,
         updatedAt: now,
       };
     });
 
-    return queryInterface.bulkInsert("JobApplications", applications);
+    return queryInterface.bulkInsert("JobApplications", jobApplications);
   },
 
   down: async (queryInterface) => {

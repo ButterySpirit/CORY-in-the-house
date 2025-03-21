@@ -1,5 +1,7 @@
 "use strict";
 
+const { v4: uuidv4 } = require("uuid");
+
 module.exports = {
   up: async (queryInterface) => {
     const now = new Date();
@@ -24,12 +26,10 @@ module.exports = {
       "ccccccc3-cccc-cccc-cccc-cccccccccccc",
     ];
 
-    let idCounter = 1;
-
-    eventIds.forEach((eventId, index) => {
+    eventIds.forEach((eventId) => {
       roles.forEach((role) => {
         jobPostings.push({
-          id: `job-${idCounter.toString().padStart(3, "0")}`,
+          id: uuidv4(),
           title: role === "staff" ? "Sound Tech Assistant" : "Flyer Distributor",
           description:
             role === "staff"
@@ -40,7 +40,6 @@ module.exports = {
           createdAt: now,
           updatedAt: now,
         });
-        idCounter++;
       });
     });
 

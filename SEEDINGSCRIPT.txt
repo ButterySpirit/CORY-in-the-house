@@ -1,0 +1,14 @@
+RECREATE DB AND SEED
+docker-compose down -v
+docker compose up --build -d
+docker exec -it cory_backend npx sequelize-cli db:migrate
+docker exec -it cory_backend npx sequelize-cli db:seed:all
+
+VERIFICATION
+docker exec -it cory_postgres psql -U admin -d cory_db
+
+THEN RUN ONE BY ONE
+SELECT * FROM "Users";
+SELECT * FROM "Events";
+SELECT * FROM "JobPostings";
+SELECT * FROM "JobApplications";
