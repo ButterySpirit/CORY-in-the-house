@@ -1,14 +1,29 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom"; // ✅ Import `useLocation`
 
 export default function Signup() {
+  const navigate = useNavigate();
+  const location = useLocation(); // ✅ Get URL parameters
+
+  // ✅ Default role as "organizer" but update based on URL
+  const [role, setRole] = useState("organizer");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("organizer"); // Default role is "organizer"
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
+  // ✅ Set Role Based on Query Parameter
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const selectedRole = params.get("role");
+    if (selectedRole === "staff") {
+      setRole("staff"); // ✅ If clicked "Sign Up as Staff"
+    } else if (selectedRole === "organizer") {
+      setRole("organizer"); // ✅ If clicked "Sign Up as Organizer"
+    }
+  }, [location.search]);
+
+  // ✅ Handle Signup Submission
   const handleSignup = async (e) => {
     e.preventDefault();
     setError(""); // Clear previous errors
@@ -16,7 +31,7 @@ export default function Signup() {
     try {
       const response = await fetch("http://localhost:3000/users", {
         method: "POST",
-        credentials: "include", // ✅ Ensures cookies/sessions work
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password, role }),
       });
@@ -71,7 +86,7 @@ export default function Signup() {
             className="w-full border border-gray-300 rounded px-3 py-2"
           />
 
-          {/* Role Selection - Only "organizer" or "staff" */}
+          {/* ✅ Role Selector with Pre-selected Role */}
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
@@ -82,15 +97,15 @@ export default function Signup() {
             <option value="staff">Staff</option>
           </select>
 
-          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded">
+          <button type="submit" className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition">
             Sign Up
           </button>
         </form>
 
-        {/* Link to Login Page */}
+        {/* ✅ Link to Login Page */}
         <p className="text-center mt-4 text-gray-600">
           Already have an account?{" "}
-          <a href="/login" className="text-blue-500 hover:underline">
+          <a href="/login" className="text-black font-medium hover:underline">
             Login
           </a>
         </p>

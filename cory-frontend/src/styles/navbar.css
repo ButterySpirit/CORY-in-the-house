@@ -102,10 +102,23 @@
 
 /* ✅ Auth Buttons (Login / Signup) */
 .btn-auth {
-  min-width: 100px;
-  display: flex;
-  justify-content: center;
   align-items: center;
+  border: 1px solid var(--primary-color);
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  cursor: pointer;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.btn-auth:hover {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
 }
 
 /* ✅ Staff "Event Calendar" Button */

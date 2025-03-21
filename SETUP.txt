@@ -1,0 +1,10 @@
+AFTER CLONING REPO GO TO CORY-in-the-house AND RUN
+
+cd cory-backend
+docker-compose down -v
+docker compose up --build -d
+docker exec -it cory_backend npx sequelize-cli db:migrate
+docker exec -it cory_backend npx sequelize-cli db:seed:all
+
+cd ../cory-frontend
+docker-compose up --build -d

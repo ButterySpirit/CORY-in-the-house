@@ -26,10 +26,10 @@ export default function LandingPage() {
         <Text size="3">Enhance your staffing experience.</Text>
         <Flex mt="4" gap="3">
           <Button asChild className="btn">
-            <Link to="/signup">Sign Up as Staff or Volunteer</Link>
+            <Link to="/signup?role=staff">Sign Up as Staff or Volunteer</Link>
           </Button>
           <Button asChild className="btn">
-            <Link to="/signup">Sign Up as Organizer</Link>
+            <Link to="/signup?role=organizer">Sign Up as Organizer</Link>
           </Button>
         </Flex>
       </Box>

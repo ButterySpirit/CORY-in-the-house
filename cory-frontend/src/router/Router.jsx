@@ -10,6 +10,8 @@ import ViewApplications from "../pages/ViewApplications";
 import OrganizerEvents from "../pages/events/OrganizerEvents"; // ✅ Import new page
 import EventCalendar from "../pages/events/EventCalendar"; // ✅ Import new page
 import ViewEvent from "../pages/events/ViewEvent"; // ✅ View specific event
+import CreateEvent from "../pages/events/CreateEvent"; // ✅ Import new page
+import EditEvent from "../pages/events/EditEvent"; // ✅ Import EditEvent Page
 
 export default function AppRouter() {
   const { user, loading } = useAuth();
@@ -27,7 +29,8 @@ export default function AppRouter() {
         <Route path="/events/:eventId" element={<ViewEvent />} /> {/* ✅ View event details */}
         <Route path="/events" element={<EventCalendar />} /> {/* ✅ All events */}
         <Route path="/my-events" element={<OrganizerEvents />} /> {/* ✅ Organizer's events */}
-
+        <Route path="/create-event" element={<CreateEvent />} /> {/* ✅ Create new event */}
+        <Route path="/events/:eventId/edit" element={<EditEvent />} /> {/* ✅ Fix Route */}
         {user ? (
           <>
             <Route path="/organizer-dashboard" element={<OrganizerDashboard />} />
