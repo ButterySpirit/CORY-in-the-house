@@ -12,6 +12,7 @@ import EventCalendar from "../pages/events/EventCalendar"; // ✅ Import new pag
 import ViewEvent from "../pages/events/ViewEvent"; // ✅ View specific event
 import CreateEvent from "../pages/events/CreateEvent"; // ✅ Import new page
 import EditEvent from "../pages/events/EditEvent"; // ✅ Import EditEvent Page
+import ViewJobs from "../pages/jobs/ViewJobs";
 
 export default function AppRouter() {
   const { user, loading } = useAuth();
@@ -31,6 +32,8 @@ export default function AppRouter() {
         <Route path="/my-events" element={<OrganizerEvents />} /> {/* ✅ Organizer's events */}
         <Route path="/create-event" element={<CreateEvent />} /> {/* ✅ Create new event */}
         <Route path="/events/:eventId/edit" element={<EditEvent />} /> {/* ✅ Fix Route */}
+        <Route path="/jobPostings/:eventId/jobs" element={<ViewJobs />} />
+        <Route path="/jobPostings/:eventId/jobs" element={<ViewJobs />} />
         {user ? (
           <>
             <Route path="/organizer-dashboard" element={<OrganizerDashboard />} />

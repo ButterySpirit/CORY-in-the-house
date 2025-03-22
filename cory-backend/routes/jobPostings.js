@@ -74,10 +74,7 @@ router.get("/:eventId/jobs", async (req, res) => {
       return res.status(404).json({ error: "No job postings found for this event and role." });
     }
 
-    res.json({
-      message: "✅ Job postings retrieved successfully!",
-      jobPostings,
-    });
+    res.json(jobPostings);
   } catch (err) {
     console.error("❌ Error fetching job postings:", err);
     res.status(500).json({ error: err.message });
