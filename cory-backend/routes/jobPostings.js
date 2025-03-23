@@ -67,6 +67,90 @@ router.get("/:eventId/jobs", async (req, res) => {
       filter.role = normalizedRole;
     }
 
+
+    // 🔥 DELETE a specific Job Posting (only by organizer)
+router.delete("/:jobId", isOrganizer, async (req, res) => {
+  try {
+    const { jobId } = req.params;
+
+    const job = await JobPosting.findByPk(jobId);
+    if (!job) {
+      return res.status(404).json({ error: "Job posting not found." });
+    }
+
+    // Optional: Check if the job belongs to an event owned by the current organizer
+    const event = await Event.findByPk(job.eventId);
+    if (!event || event.organizerId !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized: You can only delete jobs from your own events." });
+    }
+
+    await job.destroy();
+
+    res.json({ message: "✅ Job posting deleted successfully." });
+  } catch (err) {
+    console.error("❌ Error deleting job posting:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// 🔧 UPDATE a specific Job Posting (only by organizer)
+router.put("/:jobId/edit", isOrganizer, async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const { title, description, role } = req.body;
+
+    // 🔹 Validate input
+    if (!title || !description || !role) {
+      return res.status(400).json({ error: "All fields are required." });
+    }
+
+    const validRoles = ["volunteer", "staff"];
+    if (!validRoles.includes(role.toLowerCase())) {
+      return res.status(400).json({ error: `Invalid role. Must be one of: ${validRoles.join(", ")}` });
+    }
+
+    // 🔹 Find job
+    const job = await JobPosting.findByPk(jobId);
+    if (!job) {
+      return res.status(404).json({ error: "Job posting not found." });
+    }
+
+    // 🔹 Check event ownership
+    const event = await Event.findByPk(job.eventId);
+    if (!event || event.organizerId !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized: You can only edit jobs from your own events." });
+    }
+
+    // 🔹 Update job
+    job.title = title;
+    job.description = description;
+    job.role = role.toLowerCase();
+    await job.save();
+
+    res.json({ message: "✅ Job posting updated successfully.", job });
+  } catch (err) {
+    console.error("❌ Error updating job posting:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// 🔹 GET a single job posting by ID
+router.get("/:jobId", async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const job = await JobPosting.findByPk(jobId);
+
+    if (!job) {
+      return res.status(404).json({ error: "Job not found." });
+    }
+
+    res.json(job);
+  } catch (err) {
+    console.error("❌ Error fetching job:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
     // ✅ Fetch job postings with filter
     const jobPostings = await JobPosting.findAll({ where: filter });
 

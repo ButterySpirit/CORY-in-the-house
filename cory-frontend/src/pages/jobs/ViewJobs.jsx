@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 export default function ViewJobs() {
@@ -101,19 +101,25 @@ export default function ViewJobs() {
               <p className="text-sm font-medium text-gray-600">Role: {job.role}</p>
 
               {user?.role === "organizer" && (
-                <div className="flex gap-3 mt-2">
+                <div className="flex flex-col sm:flex-row gap-3 mt-3">
                   <Link
                     to={`/jobPostings/${job.id}/edit`}
-                    className="bg-black text-white px-3 py-1 rounded"
+                    className="bg-black text-white px-4 py-2 rounded text-center"
                   >
-                    Edit
+                    ✏️ Edit
                   </Link>
                   <button
                     onClick={() => handleDelete(job.id)}
-                    className="bg-red-600 text-white px-3 py-1 rounded"
+                    className="bg-red-600 text-white px-4 py-2 rounded"
                   >
-                    Delete
+                    🗑️ Delete
                   </button>
+                  <Link
+                    to={`/jobPostings/${eventId}/jobs/${job.id}/applications`}
+                    className="bg-blue-600 text-white px-4 py-2 rounded text-center"
+                  >
+                    📄 View Applications
+                  </Link>
                 </div>
               )}
 

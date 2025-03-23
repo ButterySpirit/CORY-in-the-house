@@ -17,7 +17,7 @@ export default function ViewApplications() {
       return;
     }
 
-    fetch(`http://localhost:3000/jobApplications/${jobId}/applications`, {
+    fetch(`http://localhost:3000/applications/${jobId}/applications`, {
       method: "GET",
       credentials: "include",
       headers: { "Content-Type": "application/json" },

@@ -30,7 +30,7 @@ export default function Navbar() {
 
 
 <Link
-  to="/create-event"
+  to="/events/create"
   className="icon-button navbar-org"
   onClick={() => console.log("🟢 Create Event Button Clicked!")}
 >
