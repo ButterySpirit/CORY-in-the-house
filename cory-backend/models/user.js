@@ -15,6 +15,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         unique: true,
       },
+      profilePicture: {
+        type: DataTypes.STRING, // or TEXT if you expect long URLs
+        allowNull: true,
+      },
+      
       email: {
         type: DataTypes.STRING,
         allowNull: false,

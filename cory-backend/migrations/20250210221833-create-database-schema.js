@@ -35,6 +35,13 @@ module.exports = {
         defaultValue: 0.0,
         validate: { min: 0, max: 5 },
       },
+    
+      // ✅ New field for profile picture
+      profilePicture: {
+        type: Sequelize.STRING,
+        allowNull: true, // Optional field
+      },
+    
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

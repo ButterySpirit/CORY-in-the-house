@@ -54,6 +54,8 @@ app.use(session({
 ✅ STATIC FILES
 ========================== */
 app.use("/uploads/resumes", express.static(path.join(__dirname, "uploads/resumes")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 
 /* ==========================
 ✅ LOGGING REQUESTS

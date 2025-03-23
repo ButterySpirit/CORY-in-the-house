@@ -1,11 +1,15 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Button, Flex, DropdownMenu } from "@radix-ui/themes"; // ✅ Import DropdownMenu
-import { Plus, List, Calendar, UserCircle } from "lucide-react"; // ✅ Import User Icon
+import { Button, Flex, DropdownMenu } from "@radix-ui/themes";
+import { Plus, List, Calendar, UserCircle } from "lucide-react";
 import "../styles/navbar.css";
 
 export default function Navbar() {
   const { user, logout, loading } = useAuth();
+
+  // ✅ Debug logs
+  console.log("👤 Navbar user:", user);
+  console.log("🖼️ Navbar PFP:", user?.profilePicture);
 
   if (loading) {
     return <p className="text-center mt-4 text-gray-500">Loading...</p>;
@@ -14,41 +18,27 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        {/* ✅ Left: Brand Logo */}
+        {/* Left: Brand Logo */}
         <div className="navbar-left">
-          <Link to="/" className="navbar-logo">
-            CORY
-          </Link>
+          <Link to="/" className="navbar-logo">CORY</Link>
         </div>
 
-        {/* ✅ Center: Main Navigation */}
+        {/* Center Navigation */}
         <div className="navbar-center">
           {user ? (
             <>
               {user.role === "organizer" && (
                 <>
-
-
-<Link
-  to="/events/create"
-  className="icon-button navbar-org"
-  onClick={() => console.log("🟢 Create Event Button Clicked!")}
->
-  <Plus size={20} />
-  <span>Create Event</span>
-</Link>
-
-
-
+                  <Link to="/events/create" className="icon-button navbar-org">
+                    <Plus size={20} />
+                    <span>Create Event</span>
+                  </Link>
                   <Link to="/my-events" className="icon-button navbar-org">
                     <List size={20} />
                     <span>My Events</span>
                   </Link>
                 </>
               )}
-
-
-
               {user.role === "staff" && (
                 <Link to="/events" className="icon-button navbar-staff">
                   <Calendar size={20} />
@@ -57,7 +47,6 @@ export default function Navbar() {
               )}
             </>
           ) : (
-            /* ✅ Non-authenticated users: Centered Links */
             <Flex className="navbar-links">
               <Link to="/">Home</Link>
               <Link to="/features">Features</Link>
@@ -66,43 +55,53 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* ✅ Right: Profile Dropdown + Logout */}
+        {/* Right: Profile Dropdown */}
         <div className="navbar-right">
           {user ? (
-            <>
-              {/* ✅ Profile Dropdown */}
-              <DropdownMenu.Root>
-                <DropdownMenu.Trigger asChild>
-                  <button className="profile-link">
-                    <UserCircle size={24} className="profile-icon" />
-                    <span className="profile-name">{user.username}</span>
-                  </button>
-                </DropdownMenu.Trigger>
-                
-                <DropdownMenu.Content className="dropdown-menu" align="center">
-                  <DropdownMenu.Item asChild>
-                    <Link to="/profile" className="dropdown-item">Profile</Link>
-                  </DropdownMenu.Item>
-                  <DropdownMenu.Item asChild>
-                    <Link
-                      to={
-                        user.role === "organizer"
-                          ? "/organizer-dashboard"
-                          : user.role === "staff"
-                          ? "/staff-dashboard"
-                          : "/volunteer-dashboard"
-                      }
-                      className="dropdown-item"
-                    >
-                      Dashboard
-                    </Link>
-                  </DropdownMenu.Item>
-                  <DropdownMenu.Item onSelect={logout} className="dropdown-item logout">
-                    Log Out
-                  </DropdownMenu.Item>
-                </DropdownMenu.Content>
-              </DropdownMenu.Root>
-            </>
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger asChild>
+                <button className="profile-link flex items-center gap-2">
+                  {user.profilePicture ? (
+                    <>
+                      <img
+                        src={user.profilePicture}
+                        alt="Profile"
+                        className="w-6 h-6 rounded-full object-cover border border-gray-300"
+                      />
+                      {console.log("📸 Rendering profilePicture:", user.profilePicture)}
+                    </>
+                  ) : (
+                    <UserCircle size={24} className="text-gray-500" />
+                  )}
+                  <span className="profile-name">{user.username}</span>
+                </button>
+              </DropdownMenu.Trigger>
+
+              <DropdownMenu.Content className="dropdown-menu" align="center">
+                <DropdownMenu.Item asChild>
+                  <Link to={`/profile/${user.id}`} className="dropdown-item">
+                    Profile
+                  </Link>
+                </DropdownMenu.Item>
+                <DropdownMenu.Item asChild>
+                  <Link
+                    to={
+                      user.role === "organizer"
+                        ? "/organizer-dashboard"
+                        : user.role === "staff"
+                        ? "/staff-dashboard"
+                        : "/volunteer-dashboard"
+                    }
+                    className="dropdown-item"
+                  >
+                    Dashboard
+                  </Link>
+                </DropdownMenu.Item>
+                <DropdownMenu.Item onSelect={logout} className="dropdown-item logout">
+                  Log Out
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Root>
           ) : (
             <>
               <Link to="/login">

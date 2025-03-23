@@ -65,7 +65,7 @@ export default function ViewJobs() {
     }
 
     try {
-      const res = await fetch(`http://localhost:3000/jobApplications/${jobId}/apply`, {
+      const res = await fetch(`http://localhost:3000/applications/${jobId}/apply`, {
         method: "POST",
         credentials: "include",
         body: formData,

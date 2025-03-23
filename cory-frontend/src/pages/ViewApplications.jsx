@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function ViewApplications() {
-  const { jobId } = useParams(); // Get job ID from URL
-  const { user } = useAuth(); // Logged-in user (organizer)
+  const { jobId } = useParams();
+  const { user } = useAuth();
 
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,31 +18,47 @@ export default function ViewApplications() {
     }
 
     fetch(`http://localhost:3000/applications/${jobId}/applications`, {
-      method: "GET",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
     })
       .then((res) => {
-        if (!res.ok) {
-          throw new Error(`Server error: ${res.status} ${res.statusText}`);
-        }
+        if (!res.ok) throw new Error("Failed to load applications.");
         return res.json();
       })
       .then((data) => {
-        console.log("🔹 API Response:", data);
-        setApplications(data); // Set applications array
+        setApplications(data);
         setLoading(false);
       })
       .catch((err) => {
-        console.error("❌ Failed to fetch applications:", err);
         setError(err.message);
         setLoading(false);
       });
   }, [jobId, user]);
 
+  const updateStatus = async (applicationId, status) => {
+    try {
+      const res = await fetch(`http://localhost:3000/applications/${applicationId}/status`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Update failed.");
+
+      setApplications((prev) =>
+        prev.map((app) =>
+          app.id === applicationId ? { ...app, status } : app
+        )
+      );
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   if (loading) return <p>Loading applications...</p>;
   if (error) return <p className="text-red-500">⚠️ {error}</p>;
-  if (!applications || applications.length === 0) return <p>No applications yet.</p>;
+  if (!applications.length) return <p>No applications yet.</p>;
 
   return (
     <div className="container mx-auto mt-10 p-6">
@@ -50,31 +66,48 @@ export default function ViewApplications() {
 
       <ul className="space-y-4">
         {applications.map((app) => (
-          <li key={app.id} className="border p-4 rounded-lg shadow">
-            {/* ✅ Display applicant name & email */}
+          <li key={app.id} className="border p-4 rounded-lg shadow space-y-2">
             <h3 className="text-lg font-semibold">
-              Applicant: {app.user?.username || "Unknown"}
+              Applicant:{" "}
+              <Link
+                to={`/profile/${app.user?.id}`}
+                className="text-blue-600 underline"
+              >
+                {app.user?.username || "Unknown"}
+              </Link>
             </h3>
             <p className="text-gray-600">
               <strong>Email:</strong> {app.user?.email || "Not provided"}
             </p>
-
-            {/* ✅ Display application status */}
             <p className="text-gray-600">
               <strong>Status:</strong> {app.status}
             </p>
 
-            {/* ✅ Resume Download Link (if available) */}
             {app.resumeUrl && (
               <a
                 href={app.resumeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-500 underline"
+                className="text-blue-500 underline block"
               >
                 📄 Download Resume
               </a>
             )}
+
+            <div className="flex gap-4 mt-2">
+              <button
+                onClick={() => updateStatus(app.id, "accepted")}
+                className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+              >
+                Accept
+              </button>
+              <button
+                onClick={() => updateStatus(app.id, "rejected")}
+                className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+              >
+                Reject
+              </button>
+            </div>
           </li>
         ))}
       </ul>

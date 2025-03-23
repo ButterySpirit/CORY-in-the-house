@@ -3,13 +3,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 export default function CreateJobPosting() {
-  const { id } = useParams(); // ✅ Get Event ID from URL
-  const { user } = useAuth(); // ✅ Get logged-in user
+  const { eventId } = useParams(); // ✅ correct param name
+  const { user } = useAuth();      // ✅ get current user
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [role, setRole] = useState("volunteer"); // Default role
+  const [role, setRole] = useState("volunteer");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -18,30 +18,35 @@ export default function CreateJobPosting() {
     setError("");
     setSuccess("");
 
-    // ✅ Ensure user is an organizer
+    // ✅ Check if user is logged in and is an organizer
     if (!user || user.role !== "organizer") {
       setError("Unauthorized: Only event organizers can create job postings.");
       return;
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/jobPostings/${id}/jobs/create`, {
+      const response = await fetch(`http://localhost:3000/jobPostings/${eventId}/jobs/create`, {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description, role }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          description,
+          role,
+          organizerId: user.id, // ✅ pass real organizer ID
+        }),
       });
 
       const data = await response.json();
 
-      if (response.ok) {
-        setSuccess("Job posting created successfully!");
-        setTimeout(() => navigate(`/events/${id}`), 2000); // Redirect to event page
-      } else {
-        setError(data.error || "Failed to create job posting.");
-      }
+      if (!response.ok) throw new Error(data.error || "Failed to create job posting.");
+
+      setSuccess("Job posting created!");
+      setTimeout(() => navigate(`/events/${eventId}`), 1500); // ✅ redirect
     } catch (err) {
-      setError("Server error. Please try again.");
+      setError(err.message);
     }
   };
 

@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
 
       if (data?.user) {
         console.log("🎯 [AuthContext] User data received:", data.user);
-        setUser(data.user); // ✅ Set user state
+        setUser(data.user);
       } else {
         console.warn("⚠️ [AuthContext] No user found in session.");
         setUser(null);
@@ -29,7 +29,24 @@ export function AuthProvider({ children }) {
       console.error("❌ [AuthContext] Failed to fetch session", error);
       setUser(null);
     }
+
     setLoading(false);
+  }
+
+  // ✅ Refresh user manually (e.g., after profile update)
+  async function refreshUser() {
+    try {
+      const res = await fetch("http://localhost:3000/users/session", {
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (data?.user) {
+        console.log("🔄 [AuthContext] Refreshed user data:", data.user);
+        setUser(data.user);
+      }
+    } catch (err) {
+      console.error("❌ [AuthContext] Failed to refresh user", err);
+    }
   }
 
   // ✅ Fetch session on mount
@@ -41,7 +58,7 @@ export function AuthProvider({ children }) {
   // ✅ Login function (forces re-fetch after login)
   const login = async (email, password) => {
     console.log("🚀 [AuthContext] Attempting login...");
-    
+
     const response = await fetch("http://localhost:3000/users/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -55,14 +72,15 @@ export function AuthProvider({ children }) {
     if (response.ok && data.user) {
       console.log("🎯 [AuthContext] Login successful, updating user state...");
       setUser(data.user);
-      await fetchSession(); // ✅ Forces re-fetch after login
+      await fetchSession();
     } else {
       console.error("❌ [AuthContext] Login failed", data);
     }
+
     return data;
   };
 
-  // ✅ Logout function (clears user state)
+  // ✅ Logout function
   const logout = async () => {
     console.log("🚪 [AuthContext] Logging out...");
 
@@ -76,7 +94,9 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser,login, logout, loading }}>
+    <AuthContext.Provider
+      value={{ user, setUser, login, logout, loading, refreshUser }}
+    >
       {children}
     </AuthContext.Provider>
   );

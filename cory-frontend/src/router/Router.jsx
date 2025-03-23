@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import Layout from "../components/Layout"; // ✅ Navbar layout
+import Layout from "../components/Layout";
 
 // Auth & Home
 import LandingPage from "../pages/home/LandingPage";
@@ -27,6 +27,11 @@ import ViewJobs from "../pages/jobs/ViewJobs";
 import CreateJobPosting from "../pages/jobs/CreateJobPosting";
 import ApplyForJob from "../pages/jobs/ApplyForJob";
 import EditJob from "../pages/jobs/EditJob";
+
+// Profile
+import ViewProfile from "../pages/profile/ViewProfile"; // ✅ Import it here
+
+import EditProfile from "../pages/profile/EditProfile"; // ✅ Import it here
 
 export default function AppRouter() {
   const { user, loading } = useAuth();
@@ -58,6 +63,10 @@ export default function AppRouter() {
           <Route path="/jobPostings/:eventId/jobs/:jobId/applications" element={<ViewApplications />} />
           <Route path="/applications/:jobId/apply" element={<ApplyForJob />} />
           <Route path="/jobPostings/:jobId/edit" element={<EditJob />} />
+
+          {/* Profile */}
+          <Route path="/profile/:userId" element={<ViewProfile />} /> 
+          <Route path="/profile/:userId/edit" element={<EditProfile />} />
 
           {/* Protected Dashboards */}
           {user ? (
