@@ -16,16 +16,15 @@ module.exports = (sequelize, DataTypes) => {
         unique: true,
       },
       profilePicture: {
-        type: DataTypes.STRING, // or TEXT if you expect long URLs
+        type: DataTypes.STRING,
         allowNull: true,
       },
-      
       email: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
         validate: {
-          isEmail: true, // ✅ Ensures valid email format
+          isEmail: true,
         },
       },
       password: {
@@ -35,29 +34,27 @@ module.exports = (sequelize, DataTypes) => {
       role: {
         type: DataTypes.ENUM("organizer", "volunteer", "staff"),
         allowNull: false,
-        defaultValue: "staff", // ✅ Default role is "staff"
+        defaultValue: "staff",
         validate: {
-          isIn: [["organizer", "volunteer", "staff"]], // ✅ Ensures only valid roles
+          isIn: [["organizer", "volunteer", "staff"]],
         },
       },
       rating: {
         type: DataTypes.FLOAT,
-        defaultValue: 0.0, // ✅ Default rating
+        defaultValue: 0.0,
         validate: {
           min: 0,
-          max: 5, // ✅ Ensure rating is between 0 and 5
+          max: 5,
         },
       },
     },
     {
       hooks: {
-        // ✅ Hash password before creating a user
         beforeCreate: async (user) => {
           if (user.password) {
             user.password = await bcryptjs.hash(user.password, 10);
           }
         },
-        // ✅ Hash password only if it's changed during an update
         beforeUpdate: async (user) => {
           if (user.changed("password")) {
             user.password = await bcryptjs.hash(user.password, 10);
@@ -65,15 +62,22 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       defaultScope: {
-        attributes: { exclude: ["password"] }, // ✅ Hide password in default queries
+        attributes: { exclude: ["password"] },
       },
       scopes: {
         withPassword: {
-          attributes: { include: ["password"] }, // ✅ Include password only when explicitly needed
+          attributes: { include: ["password"] },
         },
       },
     }
   );
+
+  // ✅ Add association here
+  User.associate = function (models) {
+    User.hasMany(models.Message, {
+      foreignKey: "senderId",
+    });
+  };
 
   return User;
 };

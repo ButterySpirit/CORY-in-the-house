@@ -2,13 +2,16 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    // Create Users Table (NO `usedLinks`)
+    // ✅ Enable gen_random_uuid() function for UUIDs
+    await queryInterface.sequelize.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
+
+    // Create Users Table
     await queryInterface.createTable("Users", {
       id: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
+        defaultValue: Sequelize.literal("gen_random_uuid()"),
       },
       username: {
         type: Sequelize.STRING,
@@ -19,7 +22,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true,
-        validate: { isEmail: true },
       },
       password: {
         type: Sequelize.STRING,
@@ -33,15 +35,11 @@ module.exports = {
       rating: {
         type: Sequelize.FLOAT,
         defaultValue: 0.0,
-        validate: { min: 0, max: 5 },
       },
-    
-      // ✅ New field for profile picture
       profilePicture: {
         type: Sequelize.STRING,
-        allowNull: true, // Optional field
+        allowNull: true,
       },
-    
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
@@ -58,7 +56,7 @@ module.exports = {
     await queryInterface.createTable("Events", {
       id: {
         type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
+        defaultValue: Sequelize.literal("gen_random_uuid()"),
         primaryKey: true,
       },
       title: {
@@ -99,7 +97,7 @@ module.exports = {
     await queryInterface.createTable("JobPostings", {
       id: {
         type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
+        defaultValue: Sequelize.literal("gen_random_uuid()"),
         primaryKey: true,
       },
       title: {
@@ -136,7 +134,7 @@ module.exports = {
     await queryInterface.createTable("JobApplications", {
       id: {
         type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
+        defaultValue: Sequelize.literal("gen_random_uuid()"),
         primaryKey: true,
       },
       userId: {
@@ -171,9 +169,47 @@ module.exports = {
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
     });
+
+    // ✅ Create Messages Table
+    await queryInterface.createTable("messages", {
+      id: {
+        allowNull: false,
+        primaryKey: true,
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.literal("gen_random_uuid()"),
+      },
+      roomId: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      senderId: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: "Users",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+      },
+      content: {
+        type: Sequelize.TEXT,
+        allowNull: false,
+      },
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+      },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+      },
+    });
   },
 
   async down(queryInterface, Sequelize) {
+    await queryInterface.dropTable("messages");
     await queryInterface.dropTable("JobApplications");
     await queryInterface.dropTable("JobPostings");
     await queryInterface.dropTable("Events");

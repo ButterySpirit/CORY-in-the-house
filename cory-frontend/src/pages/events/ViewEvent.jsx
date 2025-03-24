@@ -36,7 +36,6 @@ export default function ViewEvent() {
 
   const isOrganizer = user && event.User && user.id === event.User.id;
 
-  // 🔹 Determine Dashboard Route
   const getDashboardRoute = () => {
     if (!user) return "/";
     return user.role === "organizer"
@@ -59,20 +58,39 @@ export default function ViewEvent() {
       <h2 className="text-4xl font-bold text-gray-900 mb-4">{event.title}</h2>
       <p className="text-lg text-gray-700 leading-relaxed">{event.description}</p>
       <div className="mt-5">
-        <p className="text-gray-600"><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
-        <p className="text-gray-600"><strong>Location:</strong> {event.location}</p>
+        <p className="text-gray-600">
+          <strong>Date:</strong> {new Date(event.date).toLocaleDateString()}
+        </p>
+        <p className="text-gray-600">
+          <strong>Location:</strong> {event.location}
+        </p>
+
         {event.User && (
-          <p className="text-gray-600"><strong>Organizer:</strong> {event.User.username}</p>
+          <p className="text-gray-600">
+            <strong>Organizer:</strong>{" "}
+            <Link
+              to={`/profile/${event.User.id}`}
+              className="text-blue-600 underline hover:text-blue-800"
+            >
+              {event.User.username}
+            </Link>
+          </p>
         )}
       </div>
 
       {/* 🔹 Organizer Actions */}
       {isOrganizer && (
         <div className="mt-6 flex gap-3">
-          <Link to={`/events/${eventId}/edit`} className="bg-black text-white px-5 py-2 rounded-lg shadow hover:bg-gray-900 transition">
+          <Link
+            to={`/events/${eventId}/edit`}
+            className="bg-black text-white px-5 py-2 rounded-lg shadow hover:bg-gray-900 transition"
+          >
             ✏️ Edit Event
           </Link>
-          <Link to={`/events/${eventId}/jobs/create`} className="bg-black text-white px-5 py-2 rounded-lg shadow hover:bg-gray-900 transition">
+          <Link
+            to={`/events/${eventId}/jobs/create`}
+            className="bg-black text-white px-5 py-2 rounded-lg shadow hover:bg-gray-900 transition"
+          >
             📌 Create Job Posting
           </Link>
         </div>
@@ -80,7 +98,10 @@ export default function ViewEvent() {
 
       {/* 🔹 View Jobs Button */}
       <div className="mt-6">
-        <Link to={`/jobPostings/${eventId}/jobs`} className="bg-black text-white px-5 py-2 rounded-lg shadow hover:bg-gray-900 transition">
+        <Link
+          to={`/jobPostings/${eventId}/jobs`}
+          className="bg-black text-white px-5 py-2 rounded-lg shadow hover:bg-gray-900 transition"
+        >
           🏆 View Jobs
         </Link>
       </div>

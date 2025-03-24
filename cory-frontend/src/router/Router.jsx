@@ -19,6 +19,7 @@ import OrganizerEvents from "../pages/events/OrganizerEvents";
 import CreateEvent from "../pages/events/CreateEvent";
 import EditEvent from "../pages/events/EditEvent";
 
+import ChatRoom from "../pages/ChatRoom"; // ✅ create this later
 // Applications
 import ViewApplications from "../pages/ViewApplications";
 
@@ -67,6 +68,8 @@ export default function AppRouter() {
           {/* Profile */}
           <Route path="/profile/:userId" element={<ViewProfile />} /> 
           <Route path="/profile/:userId/edit" element={<EditProfile />} />
+          
+          <Route path="/chat/:roomId" element={<ChatRoom />} />
 
           {/* Protected Dashboards */}
           {user ? (
