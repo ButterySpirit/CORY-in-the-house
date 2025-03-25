@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
   
     Event.associate = (models) => {
       Event.belongsTo(models.User, { foreignKey: "organizerId", onDelete: "CASCADE" });
-      Event.hasMany(models.JobPosting, { foreignKey: "eventId", onDelete: "CASCADE" });
+      Event.hasMany(models.JobPosting, { foreignKey: "eventId", as: "jobPostings" }); // ✅ Add alias
     };
   
     return Event;

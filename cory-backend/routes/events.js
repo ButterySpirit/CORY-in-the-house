@@ -1,76 +1,101 @@
+// routes/events.js
+
 const express = require("express");
-const router = express.Router();
-const { Event, User } = require("../models");
+const { Sequelize } = require("sequelize");
+const { Event, User, JobPosting } = require("../models");
 const { isOrganizer } = require("../middlewares/authMiddleware");
 
-// 🔹 Organizer creates an event
+const router = express.Router();
+
+// 🔹 Create Event (Organizer only)
 router.post("/", isOrganizer, async (req, res) => {
   try {
-    const { title, description, date, location } = req.body;
-
-    if (!req.user) {
-      return res.status(401).json({ error: "You must be logged in to create an event" });
-    }
-
     const event = await Event.create({
-      title,
-      description,
-      date,
-      location,
-      organizerId: req.user.id
+      ...req.body,
+      organizerId: req.session.userId,
     });
-
-    res.status(201).json({
-      message: "Event created successfully",
-      event,
-    });
+    res.status(201).json(event);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(400).json({ error: err.message });
   }
 });
 
-// 🔹 Get all events with organizer details
+// 🔹 Get All Events (Public) with Job Count
 router.get("/", async (req, res) => {
   try {
     const events = await Event.findAll({
-      include: {
-        model: User,
-        attributes: ["id", "username", "email", "role"], // ✅ Hide sensitive data
-      }
+      include: [
+        {
+          model: JobPosting,
+          as: "jobPostings",
+          attributes: [], // we don’t need the full data
+        },
+        {
+          model: User,
+          attributes: ["id", "username", "email", "role"],
+        },
+      ],
+      attributes: {
+        include: [
+          [Sequelize.fn("COUNT", Sequelize.col("jobPostings.id")), "jobCount"]
+        ],
+      },
+      group: ["Event.id", "User.id"],
     });
 
-    res.json(events);
+    res.json(events.map((event) => ({
+      ...event.toJSON(),
+      jobCount: parseInt(event.get("jobCount") || 0),
+    })));
+
+  } catch (err) {
+    console.error("❌ Failed to fetch events with job counts:", err);
+    res.status(500).json({ error: "Failed to fetch events" });
+  }
+});
+
+// 🔹 Get Events Created by Logged-In Organizer
+router.get("/my-events", isOrganizer, async (req, res) => {
+  try {
+    const events = await Event.findAll({
+      where: { organizerId: req.session.userId },
+      include: [
+        {
+          model: JobPosting,
+          as: "jobPostings",
+          attributes: [], // we don’t need the full data
+        },
+        {
+          model: User,
+          attributes: ["id", "username", "email", "role"],
+        },
+      ],
+      attributes: {
+        include: [
+          [Sequelize.fn("COUNT", Sequelize.col("jobPostings.id")), "jobCount"],
+        ],
+      },
+      group: ["Event.id", "User.id"],
+    });
+
+    res.json(events.map((event) => ({
+      ...event.toJSON(),
+      jobCount: parseInt(event.get("jobCount") || 0),
+    })));    
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// 🔹 Get all events created by the logged-in organizer
-router.get("/my-events", isOrganizer, async (req, res) => {
-  try {
-    const events = await Event.findAll({
-      where: { organizerId: req.user.id },
-      include: {
-        model: User,
-        attributes: ["id", "username", "email", "role"], // ✅ Hide sensitive data
-      }
-    });
-
-    res.json(events);
-  } catch (err) {
-    console.error("❌ Error fetching organizer's events:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-// 🔹 Get a specific event by ID
+// 🔹 Get Single Event by ID
 router.get("/:id", async (req, res) => {
   try {
     const event = await Event.findByPk(req.params.id, {
       include: {
         model: User,
-        attributes: ["id", "username", "email", "role"], // ✅ Hide sensitive data
-      }
+        attributes: ["id", "username", "email", "role"],
+      },
     });
 
     if (!event) {
@@ -83,7 +108,27 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// 🔹 Delete an event (Only the Organizer who created it can delete it)
+// 🔹 Update Event (Only Organizer)
+router.put("/:id", isOrganizer, async (req, res) => {
+  try {
+    const event = await Event.findByPk(req.params.id);
+
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    if (event.organizerId !== req.session.userId) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    await event.update(req.body);
+    res.json({ message: "Event updated successfully", event });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 🔹 Delete Event (Only Organizer)
 router.delete("/:id", isOrganizer, async (req, res) => {
   try {
     const event = await Event.findByPk(req.params.id);
@@ -92,9 +137,8 @@ router.delete("/:id", isOrganizer, async (req, res) => {
       return res.status(404).json({ error: "Event not found" });
     }
 
-    // ✅ Only the organizer who created the event can delete it
-    if (event.organizerId !== req.user.id) {
-      return res.status(403).json({ error: "You can only delete events you created" });
+    if (event.organizerId !== req.session.userId) {
+      return res.status(403).json({ error: "Unauthorized" });
     }
 
     await event.destroy();
@@ -103,34 +147,5 @@ router.delete("/:id", isOrganizer, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-// 🔹 Edit an event (Only the Organizer who created it can edit it)
-router.put("/:id", isOrganizer, async (req, res) => {
-  try {
-    const { title, description, date, location } = req.body;
-    const event = await Event.findByPk(req.params.id);
-
-    if (!event) {
-      return res.status(404).json({ error: "Event not found" });
-    }
-
-    // ✅ Only allow the event's organizer to edit
-    if (event.organizerId !== req.user.id) {
-      return res.status(403).json({ error: "You can only edit events you created" });
-    }
-
-    // ✅ Update event
-    event.title = title || event.title;
-    event.description = description || event.description;
-    event.date = date || event.date;
-    event.location = location || event.location;
-    await event.save();
-
-    res.json({ message: "Event updated successfully", event });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 
 module.exports = router;

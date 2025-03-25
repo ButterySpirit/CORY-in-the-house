@@ -21,15 +21,12 @@ export default function EventList({ events, title }) {
               <span>📅 {new Date(event.date).toLocaleDateString()}</span>
             </div>
             <div className="mt-3">
-              <span className="inline-block bg-black text-white text-xs px-3 py-1 rounded-full">
-                🏆 {event.jobPostingsCount ?? 0} Job Openings
-              </span>
             </div>
             <Link
               to={`/events/${event.id}`}
               className="block mt-4 bg-black text-white text-center py-2 rounded hover:bg-gray-800 transition"
             >
-              View Event
+              View Details & Jobs
             </Link>
           </div>
         ))}

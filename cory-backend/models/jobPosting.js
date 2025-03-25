@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
     });
   
     JobPosting.associate = (models) => {
-      JobPosting.belongsTo(models.Event, { foreignKey: "eventId" });
+      JobPosting.belongsTo(models.Event, { foreignKey: "eventId" , as: "event" });
     };
   
     return JobPosting;
