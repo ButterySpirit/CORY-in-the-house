@@ -191,6 +191,16 @@ module.exports = {
         },
         onDelete: "CASCADE",
       },
+      // ✅ Add this block for receiverId
+      receiverId: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: "Users",
+          key: "id",
+        },
+        onDelete: "SET NULL",
+      },
       content: {
         type: Sequelize.TEXT,
         allowNull: false,
@@ -206,7 +216,7 @@ module.exports = {
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
     });
-  },
+  },    
 
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable("messages");

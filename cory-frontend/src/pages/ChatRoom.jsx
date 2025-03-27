@@ -88,7 +88,6 @@ export default function ChatRoom() {
         sender: user.username,
         senderId: user.id,
       });
-      setMessages((prev) => [...prev, { message, sender: "You" }]);
       setMessage("");
     }
   };

@@ -45,6 +45,11 @@ export default function Navbar() {
                   <span>Event Calendar</span>
                 </Link>
               )}
+
+              <Link to="/inbox" className="icon-button">
+                <span>Inbox</span>
+              </Link>
+
             </>
           ) : (
             <Flex className="navbar-links">

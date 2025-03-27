@@ -34,6 +34,8 @@ import ViewProfile from "../pages/profile/ViewProfile"; // ✅ Import it here
 
 import EditProfile from "../pages/profile/EditProfile"; // ✅ Import it here
 
+import Inbox from "../pages/chat/Inbox";
+
 export default function AppRouter() {
   const { user, loading } = useAuth();
 
@@ -68,6 +70,8 @@ export default function AppRouter() {
           {/* Profile */}
           <Route path="/profile/:userId" element={<ViewProfile />} /> 
           <Route path="/profile/:userId/edit" element={<EditProfile />} />
+          <Route path="/inbox" element={<Inbox />} />
+
           
           <Route path="/chat/:roomId" element={<ChatRoom />} />
 
