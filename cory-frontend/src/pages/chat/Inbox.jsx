@@ -64,7 +64,6 @@ export default function Inbox() {
                   {chat.lastUpdated ? new Date(chat.lastUpdated).toLocaleString() : "No Date"}
                 </span>
               </div>
-              <p className="text-gray-700 text-sm truncate">{chat.lastMessage || "No messages yet"}</p>
             </li>
           ))}
         </ul>

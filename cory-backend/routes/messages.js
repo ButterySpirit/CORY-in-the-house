@@ -50,7 +50,7 @@ router.get("/inbox", async (req, res) => {
       inbox.push({
         roomId,
         participant: otherUser || { username: "Unknown" },
-        lastMessage: latestMsg.message,
+        lastMessage: latestMsg.content,
         lastUpdated: latestMsg.createdAt,
       });
     }

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Button, Flex, DropdownMenu } from "@radix-ui/themes";
-import { Plus, List, Calendar, UserCircle } from "lucide-react";
+import { Plus, List, Calendar, UserCircle, MailCheck, Mail } from "lucide-react";
 import "../styles/navbar.css";
 
 export default function Navbar() {
@@ -47,6 +47,7 @@ export default function Navbar() {
               )}
 
               <Link to="/inbox" className="icon-button">
+                <Mail size={20} />
                 <span>Inbox</span>
               </Link>
 

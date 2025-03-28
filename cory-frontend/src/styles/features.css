@@ -1,0 +1,65 @@
+.features-container {
+    scroll-behavior: smooth;
+    margin-top: 80px; /* To offset fixed navbar */
+  }
+  
+  .features-section {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px;
+    box-sizing: border-box;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+  
+  .features-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .feature-img {
+    width: auto;
+    max-height: 50%;
+    margin-bottom: 20px;
+    border-radius: 15px;
+  }
+  
+  .features-section h6,
+  .features-section p,
+  .features-section ul {
+    margin-bottom: 16px;
+    max-width: 600px;
+  }
+  
+  .features-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    font-size: 14px;
+    color: #444;
+  }
+  
+  .features-section ul li {
+    margin-bottom: 8px;
+  }
+  
+  .scroll-arrow {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: black;
+    cursor: pointer;
+    margin-top: 30px;
+    animation: bounce 2s infinite;
+  }
+  
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(5px); }
+  }
+  

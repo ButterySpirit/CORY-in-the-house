@@ -4,6 +4,8 @@ import Layout from "../components/Layout";
 
 // Auth & Home
 import LandingPage from "../pages/home/LandingPage";
+import Features from "../pages/home/Features";
+import About from "../pages/home/About";
 import Login from "../pages/auth/Login";
 import Signup from "../pages/auth/Signup";
 
@@ -50,6 +52,8 @@ export default function AppRouter() {
         <Route element={<Layout />}>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/features" element={<Features />} />
+          <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 

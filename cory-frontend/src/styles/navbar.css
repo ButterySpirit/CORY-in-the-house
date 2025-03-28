@@ -133,6 +133,21 @@
   transition: color 0.3s ease;
 }
 
+.icon-button {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* ✅ Adds space between icon and text */
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: black;
+  transition: color 0.3s ease;
+}
+
+.icon-button:hover {
+  color: gray;
+}
+
 .navbar-staff:hover {
   color: gray;
 }

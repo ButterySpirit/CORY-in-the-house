@@ -95,6 +95,7 @@ export default function Signup() {
           >
             <option value="organizer">Organizer</option>
             <option value="staff">Staff</option>
+            <option value="volunteer">Volunteer</option>
           </select>
 
           <button type="submit" className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition">
